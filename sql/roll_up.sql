@@ -163,20 +163,20 @@ where cte2.standadard_id = drm.standard_concept_id;
 
 -- name: split_multi_ingredients_to_separate_entries
 insert into faers.drug_mapping (select distinct scdm.drug_name_original,
-                                                           scdm.drug_name_clean,
-                                                           scdm.concept_id,
-                                                           scdm.update_method,
-                                                           scdm.rxcui,
-                                                           scdm.name_count,
-                                                           cast(c.concept_id as varchar) as standard_concept_id
-                                           from staging_vocabulary.concept c
-                                                    join faers.drug_mapping scdm
-                                                         on cast(c.concept_id as varchar) = any
-                                                            (string_to_array(scdm.standard_concept_id, ','))
-                                           where scdm.standard_concept_id like '%,%'
-                                             and c.concept_class_id = 'Ingredient'
-                                             and c.standard_concept = 'S'
-                                             and c.invalid_reason is null);
+                                                scdm.drug_name_clean,
+                                                scdm.concept_id,
+                                                scdm.update_method,
+                                                scdm.rxcui,
+                                                scdm.standard_concept_id,
+                                                scdm.occurrences
+                                from staging_vocabulary.concept c
+                                         join faers.drug_mapping scdm
+                                              on cast(c.concept_id as varchar) = any
+                                                 (string_to_array(scdm.standard_concept_id, ','))
+                                where scdm.standard_concept_id like '%,%'
+                                  and c.concept_class_id = 'Ingredient'
+                                  and c.standard_concept = 'S'
+                                  and c.invalid_reason is null);
 
 
 -- name: single_ingredient_clinical_drug_form_to_ingredient
@@ -213,7 +213,8 @@ set standard_concept_id = concept_id
 where standard_concept_id like '%,%';
 
 -- name: delete_multi
-delete from faers.drug_mapping drm
+delete
+from faers.drug_mapping drm
 where standard_concept_id like '%,%';
 
 -- name: standardize_residue

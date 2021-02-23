@@ -40,7 +40,9 @@ pub async fn create_final_tables(pool: &Pool) {
         .unwrap()
         .queries;
     let client = pool.get().await.unwrap();
+    execute("drop_scdm_table", &client, &queries).await;
     execute("create_scdm_table", &client, &queries).await;
+    execute("drop_standard_case_drug", &client, &queries).await;
     execute("create_standard_case_drug", &client, &queries).await;
 }
 

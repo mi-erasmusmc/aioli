@@ -1,3 +1,9 @@
+-- name: drop_scdm_table
+DROP TABLE IF EXISTS faers.standard_combined_drug_mapping;
+
+-- name: drop_standard_case_drug
+DROP TABLE IF EXISTS faers.standard_case_drug;
+
 -- name: create_scdm_table
 CREATE TABLE faers.standard_combined_drug_mapping AS
 SELECT DISTINCT primaryid,
