@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/rusty_aioli.iml" filepath="$PROJECT_DIR$/rusty_aioli.iml" />
+      <module fileurl="file://$PROJECT_DIR$/aioli.iml" filepath="$PROJECT_DIR$/aioli.iml" />
     </modules>
   </component>
 </project>

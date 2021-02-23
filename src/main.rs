@@ -1,5 +1,5 @@
 use crate::mapping::{
-    create_final_tables, create_mapping_table, exact_mapping, initial_basic_mapping,
+    create_final_tables, create_mapping_table, initial_basic_mapping,
     map_rx_to_cdm_concept_id, roll_up, run_original_aeolus, rxnormalize,
 };
 use std::env;
@@ -21,15 +21,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let pool = db::init_db_pool();
 
     println!("Starting Drug Mapping...");
- //   create_mapping_table(&pool).await?;
- //   initial_basic_mapping(&pool).await?;
+    create_mapping_table(&pool).await?;
+    initial_basic_mapping(&pool).await?;
 
     if !skip_normalizer {
         rxnormalize(&pool).await?;
     }
     map_rx_to_cdm_concept_id(&pool).await;
     run_original_aeolus(&pool).await;
-    // roll_up(&pool, split_multi).await;
-    // create_final_tables(&pool).await;
+    roll_up(&pool, split_multi).await;
+    create_final_tables(&pool).await;
     Ok(())
 }

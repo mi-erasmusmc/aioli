@@ -6,7 +6,7 @@ WHERE rxcui IS NULL
   AND drug_name_clean IS NOT NULL
 GROUP BY drug_name_clean
 ORDER BY sum DESC
-LIMIT 10000;
+LIMIT 20000;
 
 
 -- name: find_eu_drugs

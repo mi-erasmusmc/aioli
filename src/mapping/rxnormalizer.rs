@@ -15,7 +15,7 @@ pub async fn normalize(pool: &Pool, eu_only: bool) -> Result<(), Box<dyn Error>>
     let queries = Loader::get_queries_from("./sql/rxnormalizer.sql")
         .unwrap()
         .queries;
-    let mut stmt: &str = "";
+    let stmt: &str;
     if eu_only {
         stmt = queries.get("find_eu_drugs").unwrap().as_str();
     } else {

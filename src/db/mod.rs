@@ -41,7 +41,7 @@ pub fn init_db_pool() -> Pool {
     let mut pg_config = tokio_postgres::Config::new();
     pg_config.port(5432);
     pg_config.host("localhost");
-    pg_config.user("rowan");
+    pg_config.user("postgres");
     pg_config.dbname("cem");
     let mgr_config = ManagerConfig {
         recycling_method: RecyclingMethod::Fast,

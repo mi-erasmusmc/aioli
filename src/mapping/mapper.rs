@@ -2,7 +2,7 @@ use deadpool_postgres::Pool;
 use rawsql::Loader;
 
 use crate::db::{execute, execute_param};
-use crate::mapping::{map_rx_to_cdm_concept_id, rxnormalize, rxnormalizer};
+use crate::mapping::{map_rx_to_cdm_concept_id, rxnormalizer};
 use std::env;
 use std::error::Error;
 
@@ -18,7 +18,8 @@ pub async fn basic_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
             &client,
             &queries,
             "Initial mapping",
-        ).await;
+        )
+            .await;
     }
     let mut result: u64 = 1;
     while result != 0 {
@@ -28,16 +29,16 @@ pub async fn basic_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
 }
 
 pub async fn run_aeolus_mapping(pool: &Pool) {
-    // let mut result: u64 = 1;
-    // while result != 0 {
-    //     result = remove_keywords(pool).await;
-    // }
-    // map_rx_to_cdm_concept_id(&pool).await;
-    //   drug_name_parenthsis(&pool).await;
-    // eu_drug_name(&pool).await;
-    // ingredient_matching(&pool).await;
-    // active_ingredient_mapping(&pool).await;
-    // nda_ingredient_mapping(&pool).await;
+    let mut result: u64 = 1;
+    while result != 0 {
+        result = remove_keywords(pool).await;
+    }
+    map_rx_to_cdm_concept_id(&pool).await;
+    drug_name_parenthsis(&pool).await;
+    eu_drug_name(&pool).await;
+    ingredient_matching(&pool).await;
+    active_ingredient_mapping(&pool).await;
+    nda_ingredient_mapping(&pool).await;
     manual_mapping(&pool).await;
 }
 
@@ -62,7 +63,8 @@ async fn clean_and_match(pool: &Pool) -> u64 {
         &client,
         &queries,
         "Initial mapping",
-    ).await
+    )
+        .await
 }
 
 async fn remove_keywords(pool: &Pool) -> u64 {
@@ -110,7 +112,7 @@ async fn eu_drug_name(pool: &Pool) {
     execute("eu", &client, &eu_queries).await;
     execute_param("find_match_on_rxconso", &client, &queries, "eu drug").await;
 
-    rxnormalizer::normalize(&pool, true).await;
+    rxnormalizer::normalize(&pool, true).await.unwrap();
 
     map_rx_to_cdm_concept_id(&pool).await;
 
@@ -209,9 +211,7 @@ async fn manual_mapping(pool: &Pool) {
     println!("Loading previously mapped manual mapping");
     let client = pool.get().await.unwrap();
 
-    let queries = Loader::get_queries_from("sql/aeolus.sql")
-        .unwrap()
-        .queries;
+    let queries = Loader::get_queries_from("sql/aeolus.sql").unwrap().queries;
 
     execute("drop_manual_table", &client, &queries).await;
     execute("create_manual_table", &client, &queries).await;

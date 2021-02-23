@@ -2,11 +2,6 @@ use deadpool_postgres::Pool;
 use rawsql::Loader;
 
 use crate::db::execute;
-use crate::mapping::exact_mapping::map;
-use crate::mapping::mapper::run_aeolus_mapping;
-use crate::mapping::roll_up::roll;
-use crate::mapping::rx_to_standard::populate_concept_ids;
-use crate::mapping::rxnormalizer::normalize;
 
 use std::error::Error;
 
@@ -28,15 +23,15 @@ pub async fn initial_basic_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
 }
 
 pub async fn rxnormalize(pool: &Pool) -> Result<(), Box<dyn Error>> {
-    normalize(&pool, false).await
+    rxnormalizer::normalize(&pool, false).await
 }
 
 pub async fn map_rx_to_cdm_concept_id(pool: &Pool) {
-    populate_concept_ids(&pool).await
+    rx_to_standard::populate_concept_ids(&pool).await
 }
 
 pub async fn run_original_aeolus(pool: &Pool) {
-    run_aeolus_mapping(&pool).await
+    mapper::run_aeolus_mapping(&pool).await
 }
 
 pub async fn create_final_tables(pool: &Pool) {
@@ -50,10 +45,5 @@ pub async fn create_final_tables(pool: &Pool) {
 }
 
 pub async fn roll_up(pool: &Pool, split_multi: bool) {
-    roll(&pool, split_multi).await;
-}
-
-pub async fn exact_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
-    map(&pool).await?;
-    Ok(())
+    roll_up::do_roll_up(&pool, split_multi).await;
 }
