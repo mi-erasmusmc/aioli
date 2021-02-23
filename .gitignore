@@ -1,8 +1,7 @@
-### under construction stuffs
-src/mapping/exact_mapping.rs
-sql/exact_mapping.sql
-sql/create_faers.sql
-sql/fda_data_pull
+/src/mapping/exact_mapping.rs
+/sql/exact_mapping.sql
+/sql/create_faers.sql
+/sql/fda_data_pull
 
 
 
