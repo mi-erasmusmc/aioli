@@ -5,11 +5,18 @@ use crate::db::execute;
 
 use std::error::Error;
 
+mod exact_mapping;
 mod mapper;
 mod roll_up;
 mod rx_to_standard;
 mod rxnormalizer;
 mod table_creator;
+
+
+pub async fn do_exact_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
+    exact_mapping::map(pool).await?;
+    Ok(())
+}
 
 pub async fn create_mapping_table(pool: &Pool) -> Result<(), Box<dyn Error>> {
     table_creator::create_mapping_table(pool).await?;

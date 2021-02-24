@@ -25,16 +25,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Initializing DB pool...");
     let pool = db::init_db_pool();
 
-    println!("Starting Drug Mapping...");
-    create_mapping_table(&pool).await?;
-    initial_basic_mapping(&pool).await?;
+    mapping::do_exact_mapping(&pool).await?;
 
-    if !skip_normalizer {
-        rxnormalize(&pool).await?;
-    }
-    map_rx_to_cdm_concept_id(&pool).await;
-    run_original_aeolus(&pool).await;
-    roll_up(&pool, split_multi).await;
-    create_final_tables(&pool).await;
+    // println!("Starting Drug Mapping...");
+    // create_mapping_table(&pool).await?;
+    // initial_basic_mapping(&pool).await?;
+    //
+    // if !skip_normalizer {
+    //     rxnormalize(&pool).await?;
+    // }
+    // map_rx_to_cdm_concept_id(&pool).await;
+    // run_original_aeolus(&pool).await;
+    // roll_up(&pool, split_multi).await;
+    // create_final_tables(&pool).await;
     Ok(())
 }
