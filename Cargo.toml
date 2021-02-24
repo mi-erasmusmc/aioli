@@ -1,5 +1,5 @@
 [package]
-name = "rusty_aioli"
+name = "aioli"
 version = "0.1.0"
 authors = ["Rowan Parry <r.parry@erasmusmc.nl>"]
 edition = "2018"
