@@ -5,7 +5,6 @@ use crate::db::execute;
 
 use std::error::Error;
 
-mod exact_mapping;
 mod mapper;
 mod roll_up;
 mod rx_to_standard;
