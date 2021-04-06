@@ -30,8 +30,9 @@ comments and suggestions are very much welcome.
       the [Article 57 Data](https://www.ema.europa.eu/en/human-regulatory/post-authorisation/data-medicines-iso-idmp-standards/public-data-article-57-database)
       from the xls file available there copy *name*, *ingredient* and *route* columns into a table called *article* (
       TODO: automate this step)
+    - Include ATC codes in your OMOP vocabulary.
     - Obtain the mapping from RxNorm to ATC being developed at the ErasmusMC Medical Informatics department, get in
-      touch for more details.
+      touch with the author of this app for more details.
 
 ### HOW TO RUN
 
