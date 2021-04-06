@@ -1,93 +1,93 @@
 -- name: single_ingredients_from_article_57
-with cte as (select distinct lower(rx.str) as str, dme.drugname_clean
-             from faers.article eu
-                      join faers.drug_mapping_exact dme on dme.drugname_clean = lower(eu.name)
-                      join faers.rxnconso rx on lower(rx.str) = lower(eu.ingredient)
-             where dme.rx_ingredient is null
-               and rx.sab = 'RXNORM'
-               and rx.tty = 'IN')
+WITH cte AS (SELECT DISTINCT lower(rx.str) AS str, dme.drugname_clean
+             FROM faers.article eu
+                      JOIN faers.drug_mapping_exact dme ON dme.drugname_clean = lower(eu.name)
+                      JOIN faers.rxnconso rx ON lower(rx.str) = lower(eu.ingredient)
+             WHERE dme.rx_ingredient IS NULL
+               AND rx.sab = 'RXNORM'
+               AND rx.tty = 'IN')
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient = cte.str
-from cte
-where cte.drugname_clean = dme.drugname_clean
-  and dme.rx_ingredient is null;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean
+  AND dme.rx_ingredient IS NULL;
 
 -- name: pin_from_article_57
-with cte as (select distinct lower(rx.str) as str, dme.drugname_clean
-             from faers.article eu
-                      join faers.drug_mapping_exact dme on dme.drugname_clean = lower(eu.name)
-                      join faers.rxnconso rx on lower(rx.str) = lower(eu.ingredient)
-             where dme.rx_ingredient is null
-               and rx.sab = 'RXNORM'
-               and rx.tty = 'PIN')
+WITH cte AS (SELECT DISTINCT lower(rx.str) AS str, dme.drugname_clean
+             FROM faers.article eu
+                      JOIN faers.drug_mapping_exact dme ON dme.drugname_clean = lower(eu.name)
+                      JOIN faers.rxnconso rx ON lower(rx.str) = lower(eu.ingredient)
+             WHERE dme.rx_ingredient IS NULL
+               AND rx.sab = 'RXNORM'
+               AND rx.tty = 'PIN')
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient = cte.str
-from cte
-where cte.drugname_clean = dme.drugname_clean
-  and dme.rx_ingredient is null;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean
+  AND dme.rx_ingredient IS NULL;
 
 -- name: article_57_alternative_spellings
-with cte as (select distinct string_agg(distinct lower(rx2.str), ',') as str, dme.drugname_clean
-             from faers.article eu
-                      join faers.drug_mapping_exact dme on dme.drugname_clean = lower(eu.name)
-                      join faers.rxnconso rx1 on lower(rx1.str) = lower(eu.ingredient)
-                      join faers.rxnconso rx2 on rx1.rxcui = rx2.rxcui
-             where dme.rx_ingredient is null
-               and rx2.sab = 'RXNORM'
-               and rx2.tty in ('MIN', 'IN')
-             group by dme.drugname_clean
-             having count(distinct lower(rx2.str)) = 1)
+WITH cte AS (SELECT DISTINCT string_agg(DISTINCT lower(rx2.str), ',') AS str, dme.drugname_clean
+             FROM faers.article eu
+                      JOIN faers.drug_mapping_exact dme ON dme.drugname_clean = lower(eu.name)
+                      JOIN faers.rxnconso rx1 ON lower(rx1.str) = lower(eu.ingredient)
+                      JOIN faers.rxnconso rx2 ON rx1.rxcui = rx2.rxcui
+             WHERE dme.rx_ingredient IS NULL
+               AND rx2.sab = 'RXNORM'
+               AND rx2.tty IN ('MIN', 'IN')
+             GROUP BY dme.drugname_clean
+             HAVING count(DISTINCT lower(rx2.str)) = 1)
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient = cte.str
-from cte
-where cte.drugname_clean = dme.drugname_clean
-  and dme.rx_ingredient is null;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean
+  AND dme.rx_ingredient IS NULL;
 
 -- name: article_57_alternative_spellings_incl_pin
-with cte as (select distinct string_agg(distinct lower(rx2.str), ',') as str, dme.drugname_clean
-             from faers.article eu
-                      join faers.drug_mapping_exact dme on dme.drugname_clean = lower(eu.name)
-                      join faers.rxnconso rx1 on lower(rx1.str) = lower(eu.ingredient)
-                      join faers.rxnconso rx2 on rx1.rxcui = rx2.rxcui
-             where dme.rx_ingredient is null
-               and rx2.sab = 'RXNORM'
-               and rx2.tty in ('IN', 'MIN', 'PIN')
-             group by dme.drugname_clean
-             having count(distinct lower(rx2.str)) = 1)
+WITH cte AS (SELECT DISTINCT string_agg(DISTINCT lower(rx2.str), ',') AS str, dme.drugname_clean
+             FROM faers.article eu
+                      JOIN faers.drug_mapping_exact dme ON dme.drugname_clean = lower(eu.name)
+                      JOIN faers.rxnconso rx1 ON lower(rx1.str) = lower(eu.ingredient)
+                      JOIN faers.rxnconso rx2 ON rx1.rxcui = rx2.rxcui
+             WHERE dme.rx_ingredient IS NULL
+               AND rx2.sab = 'RXNORM'
+               AND rx2.tty IN ('IN', 'MIN', 'PIN')
+             GROUP BY dme.drugname_clean
+             HAVING count(DISTINCT lower(rx2.str)) = 1)
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient = cte.str
-from cte
-where cte.drugname_clean = dme.drugname_clean
-  and dme.rx_ingredient is null;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean
+  AND dme.rx_ingredient IS NULL;
 
 -- name: article_57_multi_ingr
-with cte as (select distinct lower(rx1.str), lower(replace(eu.ingredient, ',', ' /')) as str, dme.drugname_clean
-             from faers.article eu
-                      join faers.drug_mapping_exact dme on dme.drugname_clean = lower(eu.name)
-                      join faers.rxnconso rx1 on lower(rx1.str) = lower(replace(eu.ingredient, ',', ' /'))
-             where dme.rx_ingredient is null
-               and rx1.sab = 'RXNORM'
-               and rx1.tty in ('IN', 'MIN', 'PIN')
+WITH cte AS (SELECT DISTINCT lower(rx1.str), lower(replace(eu.ingredient, ',', ' /')) AS str, dme.drugname_clean
+             FROM faers.article eu
+                      JOIN faers.drug_mapping_exact dme ON dme.drugname_clean = lower(eu.name)
+                      JOIN faers.rxnconso rx1 ON lower(rx1.str) = lower(replace(eu.ingredient, ',', ' /'))
+             WHERE dme.rx_ingredient IS NULL
+               AND rx1.sab = 'RXNORM'
+               AND rx1.tty IN ('IN', 'MIN', 'PIN')
 )
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient = cte.str
-from cte
-where cte.drugname_clean = dme.drugname_clean
-  and dme.rx_ingredient is null;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean
+  AND dme.rx_ingredient IS NULL;
 
 
 -- name: set_prod_ai
-with cte as (select distinct string_agg(distinct lower(eu.ingredient), ',') as str, dme.drugname_clean
-             from faers.article eu
-                      join faers.drug_mapping_exact dme on dme.drugname_clean = lower(eu.name)
-             where dme.rx_ingredient is null
-               and dme.prod_ai_clean is null
-             group by dme.drugname_clean
-             having count(distinct lower(eu.ingredient)) = 1
+WITH cte AS (SELECT DISTINCT string_agg(DISTINCT lower(eu.ingredient), ',') AS str, dme.drugname_clean
+             FROM faers.article eu
+                      JOIN faers.drug_mapping_exact dme ON dme.drugname_clean = lower(eu.name)
+             WHERE dme.rx_ingredient IS NULL
+               AND dme.prod_ai_clean IS NULL
+             GROUP BY dme.drugname_clean
+             HAVING count(DISTINCT lower(eu.ingredient)) = 1
 )
 UPDATE faers.drug_mapping_exact dme
 SET prod_ai_clean = cte.str
-from cte
-where cte.drugname_clean = dme.drugname_clean
-  and dme.rx_ingredient is null
-  and dme.prod_ai_clean is null;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean
+  AND dme.rx_ingredient IS NULL
+  AND dme.prod_ai_clean IS NULL;

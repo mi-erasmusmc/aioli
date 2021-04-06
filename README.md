@@ -16,7 +16,7 @@ comments and suggestions are very much welcome.
   for the final stats calculations.
 
 - You will need the RxNORM database, in particular the RXNCONSO table. It is available
-  here: https://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html. The app expects the table to be located in
+  [here](https://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html). The app expects the table to be located in
   your faers schema with the name rxnconso
 
 - A database containing the RxNORM vocabulary from [OHDSI](https://athena.ohdsi.org/vocabulary/list). The app expects

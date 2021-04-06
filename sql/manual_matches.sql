@@ -38,9 +38,9 @@ WHERE drug_name_clean IN
 
 -- name: nda_nr_rubbish
 UPDATE faers.drug_mapping
-SET concept_id      = null,
-    rxcui           = null,
-    update_method   = null,
+SET concept_id      = NULL,
+    rxcui           = NULL,
+    update_method   = NULL,
     drug_name_clean = lower(drug_name_original)
 WHERE lower(drug_name_original) IN
       ('antibiotic', 'birth control', 'antibiotics', 'unknown medication', 'proton pump inhibitors', 'antidepressants',

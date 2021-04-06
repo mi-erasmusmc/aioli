@@ -1,5 +1,5 @@
 -- name: update_concept_ids
-UPDATE faers.drug_mapping as drm
+UPDATE faers.drug_mapping AS drm
 SET concept_id = c.concept_id
 FROM staging_vocabulary.concept c
 WHERE drm.rxcui = c.concept_code
@@ -30,19 +30,19 @@ WHERE concept_code = ANY ($1)
 UPDATE faers.drug_mapping AS drm
 SET concept_id    = cs.concept_id,
     update_method = 'RxNorm min to CDM Clinical Drug From'
-FROM (SELECT MAX(c.concept_id) as concept_id, rr.rxcui
+FROM (SELECT max(c.concept_id) AS concept_id, rr.rxcui
       FROM staging_vocabulary.concept c
                JOIN
            faers.rxnconso rr ON
-                   LOWER(c.concept_name) LIKE CONCAT(rr.str, '%')
-                   AND LOWER(c.concept_name) NOT LIKE CONCAT(rr.str, ' / %')
+                   lower(c.concept_name) LIKE concat(rr.str, '%')
+                   AND lower(c.concept_name) NOT LIKE concat(rr.str, ' / %')
                    AND rr.tty = 'MIN'
                    AND c.concept_class_id = 'Clinical Drug Form'
                    AND c.standard_concept = 'S'
                    AND c.vocabulary_id = 'RxNorm'
                    AND c.invalid_reason IS NULL
       GROUP BY rr.rxcui) AS cs
-WHERE CAST(cs.rxcui AS VARCHAR) = drm.rxcui
+WHERE cast(cs.rxcui AS VARCHAR) = drm.rxcui
   AND drm.concept_id IS NULL;
 
 -- name: update_single_id
@@ -58,13 +58,13 @@ WHERE lower(drug_name_clean) = $2
   AND concept_id IS NULL;
 
 -- name: find_all
-SELECT concept_id, lower(concept_name) as concept_name
+SELECT concept_id, lower(concept_name) AS concept_name
 FROM staging_vocabulary.concept
 WHERE concept_code = ANY ($1)
   AND vocabulary_id = 'RxNorm';
 
 -- name: find_best
-SELECT concept_id, lower(concept_name) as concept_name
+SELECT concept_id, lower(concept_name) AS concept_name
 FROM staging_vocabulary.concept
 WHERE concept_code = ANY ($1)
   AND concept_class_id IN ('Clinical Drug Form', 'Ingredient')
@@ -73,7 +73,7 @@ WHERE concept_code = ANY ($1)
   AND invalid_reason IS NULL;
 
 -- name: find_second_best
-SELECT concept_id, lower(concept_name) as concept_name
+SELECT concept_id, lower(concept_name) AS concept_name
 FROM staging_vocabulary.concept
 WHERE concept_code = ANY ($1)
   AND (concept_class_id IN ('Clinical Drug Form', 'Ingredient') OR standard_concept = 'S')
@@ -81,7 +81,7 @@ WHERE concept_code = ANY ($1)
   AND invalid_reason IS NULL;
 
 -- name: find_final
-SELECT concept_id, lower(concept_name) as concept_name
+SELECT concept_id, lower(concept_name) AS concept_name
 FROM staging_vocabulary.concept
 WHERE concept_code = ANY ($1)
   AND vocabulary_id = 'RxNorm'

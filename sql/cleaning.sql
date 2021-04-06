@@ -1,218 +1,218 @@
 -- name: remove_unknown
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '\((\ \yunknown|unk\y)\)|\(\y(unknown|unk)\y\)|\y(unknown|unk)\y',
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '\((\ \yunknown|unk\y)\)|\(\y(unknown|unk)\y\)|\y(unknown|unk)\y',
                                      '', 'gi')
-where drug_name_clean ~* '.+\yunknown|unk\y.+$'
-  and rxcui is null;
+WHERE drug_name_clean ~* '.+\yunknown|unk\y.+$'
+  AND rxcui IS NULL;
 
 -- name: remove_unknown_residue
-update faers.drug_mapping
-set drug_name_clean = null
-where drug_name_clean = 'ingredient'
-   or drug_name_clean = 'product'
-    and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = NULL
+WHERE drug_name_clean = 'ingredient'
+   OR drug_name_clean = 'product'
+    AND rxcui IS NULL;
 
 -- name: remove_blinded
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, ' *blinded *', '', 'gi')
-where drug_name_clean like '%blinded%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, ' *blinded *', '', 'gi')
+WHERE drug_name_clean LIKE '%blinded%'
+  AND rxcui IS NULL;
 
 -- name: change_chars
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '\\', '/', 'gi')
-where drug_name_clean like '%\%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '\\', '/', 'gi')
+WHERE drug_name_clean LIKE '%\%'
+  AND rxcui IS NULL;
 
 -- name: remove_chars
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '[\*\^\$\?]', '', 'gi')
-where rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '[\*\^\$\?]', '', 'gi')
+WHERE rxcui IS NULL;
 
 -- name: trim_semicolon
-update faers.drug_mapping
-set drug_name_clean = trim(both ';' from drug_name_clean)
-where rxcui is null
-  and (drug_name_clean like '%;' or drug_name_clean like ';%');
+UPDATE faers.drug_mapping
+SET drug_name_clean = trim(BOTH ';' FROM drug_name_clean)
+WHERE rxcui IS NULL
+  AND (drug_name_clean LIKE '%;' OR drug_name_clean LIKE ';%');
 
 -- name: trim_colon
-update faers.drug_mapping
-set drug_name_clean = trim(both ':' from drug_name_clean)
-where rxcui is null
-  and (drug_name_clean like '%:' or drug_name_clean like ':%');
+UPDATE faers.drug_mapping
+SET drug_name_clean = trim(BOTH ':' FROM drug_name_clean)
+WHERE rxcui IS NULL
+  AND (drug_name_clean LIKE '%:' OR drug_name_clean LIKE ':%');
 
 -- name: trim_spaces
-update faers.drug_mapping
-set drug_name_clean = trim(both ' ' from drug_name_clean)
-where rxcui is null
-  and (drug_name_clean like '% ' or drug_name_clean like ' %');
+UPDATE faers.drug_mapping
+SET drug_name_clean = trim(BOTH ' ' FROM drug_name_clean)
+WHERE rxcui IS NULL
+  AND (drug_name_clean LIKE '% ' OR drug_name_clean LIKE ' %');
 
 -- name: trim_slash
-update faers.drug_mapping
-set drug_name_clean = trim(both '/' from drug_name_clean)
-where rxcui is null
-  and (drug_name_clean like '%/' or drug_name_clean like '/%');
+UPDATE faers.drug_mapping
+SET drug_name_clean = trim(BOTH '/' FROM drug_name_clean)
+WHERE rxcui IS NULL
+  AND (drug_name_clean LIKE '%/' OR drug_name_clean LIKE '/%');
 
 -- name: trim_hyphen
-update faers.drug_mapping
-set drug_name_clean = trim(both '-' from drug_name_clean)
-where (drug_name_clean like '%-' or drug_name_clean like '-%')
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = trim(BOTH '-' FROM drug_name_clean)
+WHERE (drug_name_clean LIKE '%-' OR drug_name_clean LIKE '-%')
+  AND rxcui IS NULL;
 
 
 -- name: remove_quotes
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '[''""]', '', 'gi')
-where rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '[''""]', '', 'gi')
+WHERE rxcui IS NULL;
 
 -- name: reverse_dash
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, '\', ' / ')
-where drug_name_clean like '%\\%';
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, '\', ' / ')
+WHERE drug_name_clean LIKE '%\\%';
 
 
 -- name: remove_spaces_before_closing_parenthesis_char
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, ' +\)', ')', 'gi')
-where drug_name_clean like '% )%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, ' +\)', ')', 'gi')
+WHERE drug_name_clean LIKE '% )%'
+  AND rxcui IS NULL;
 
 
 -- name: remove_trailing_chars
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '[ \.\,]$', '', 'gi')
-where (drug_name_clean like '%.'
-    or drug_name_clean like '%,'
-    or drug_name_clean like '% ')
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '[ \.\,]$', '', 'gi')
+WHERE (drug_name_clean LIKE '%.'
+    OR drug_name_clean LIKE '%,'
+    OR drug_name_clean LIKE '% ')
+  AND rxcui IS NULL;
 
 -- name: remove_white
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '(\S) +', '\1 ', 'gi')
-where drug_name_clean like '%  %'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '(\S) +', '\1 ', 'gi')
+WHERE drug_name_clean LIKE '%  %'
+  AND rxcui IS NULL;
 
 -- name: add_space_parenthesis
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, '(', ' (')
-where drug_name_clean like '%(%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, '(', ' (')
+WHERE drug_name_clean LIKE '%(%'
+  AND rxcui IS NULL;
 
 
 -- name: remove_trailing_spaces
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, ' +$', '', 'gi')
-where drug_name_clean like '% '
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, ' +$', '', 'gi')
+WHERE drug_name_clean LIKE '% '
+  AND rxcui IS NULL;
 
 -- name: remove_leading_spaces
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '^ +', '', 'gi')
-where drug_name_clean like ' %'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '^ +', '', 'gi')
+WHERE drug_name_clean LIKE ' %'
+  AND rxcui IS NULL;
 
 -- name: replace_w
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, ' w/', ' / ')
-where drug_name_clean like '% w/%'
-  and drug_name_clean not like '% w/v %'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, ' w/', ' / ')
+WHERE drug_name_clean LIKE '% w/%'
+  AND drug_name_clean NOT LIKE '% w/v %'
+  AND rxcui IS NULL;
 
 -- name: add_space_to_slash
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, '/', ' / ')
-where drug_name_clean like '%/%'
-  and drug_name_clean not like '%meq/l%'
-  and drug_name_clean not like '%mg/ml%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, '/', ' / ')
+WHERE drug_name_clean LIKE '%/%'
+  AND drug_name_clean NOT LIKE '%meq/l%'
+  AND drug_name_clean NOT LIKE '%mg/ml%'
+  AND rxcui IS NULL;
 
 -- name: remove_nos
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, ' nos ', ' ')
-where drug_name_clean like '% nos %'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, ' nos ', ' ')
+WHERE drug_name_clean LIKE '% nos %'
+  AND rxcui IS NULL;
 
 -- name: remove_nos_ending
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, ' nos', '')
-where drug_name_clean like '% nos'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, ' nos', '')
+WHERE drug_name_clean LIKE '% nos'
+  AND rxcui IS NULL;
 
 -- name: remove_product
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, ' product', '')
-where drug_name_clean like '% product'
-   or drug_name_clean like '% product %'
-    and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, ' product', '')
+WHERE drug_name_clean LIKE '% product'
+   OR drug_name_clean LIKE '% product %'
+    AND rxcui IS NULL;
 
 -- name: remove_unspecified
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, 'unspecified', '')
-where drug_name_clean like '%unspecified%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, 'unspecified', '')
+WHERE drug_name_clean LIKE '%unspecified%'
+  AND rxcui IS NULL;
 
 -- name: replace_hooks_1
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, '[', '(')
-where drug_name_clean like '%[%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, '[', '(')
+WHERE drug_name_clean LIKE '%[%'
+  AND rxcui IS NULL;
 
 -- name: replace_hooks_2
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, ']', ')')
-where drug_name_clean like '%]%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, ']', ')')
+WHERE drug_name_clean LIKE '%]%'
+  AND rxcui IS NULL;
 
 -- name: replace_semi_colon
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, ';', '/')
-where drug_name_clean like '%;%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, ';', '/')
+WHERE drug_name_clean LIKE '%;%'
+  AND rxcui IS NULL;
 
 -- name: remove_product
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, '/ /', '/')
-where drug_name_clean like '%/ /%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, '/ /', '/')
+WHERE drug_name_clean LIKE '%/ /%'
+  AND rxcui IS NULL;
 
 -- name: remove_nos_parenth
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, ' (nos)', '')
-where drug_name_clean like '% (nos)'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, ' (nos)', '')
+WHERE drug_name_clean LIKE '% (nos)'
+  AND rxcui IS NULL;
 
 -- name: remove_plus
-update faers.drug_mapping
-set drug_name_clean = replace(drug_name_clean, '(+)', ' / ')
-where drug_name_clean like '%(+)%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = replace(drug_name_clean, '(+)', ' / ')
+WHERE drug_name_clean LIKE '%(+)%'
+  AND rxcui IS NULL;
 
 
 -- name: remove_leading_chars
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '^ +', '', 'gi')
-where rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '^ +', '', 'gi')
+WHERE rxcui IS NULL;
 
 
 -- name: remove_whitespace
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '(\S) +', '\1 ', 'gi')
-where rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '(\S) +', '\1 ', 'gi')
+WHERE rxcui IS NULL;
 
 -- name: remove_remove_nnnnn
-update faers.drug_mapping a
+UPDATE faers.drug_mapping a
 SET drug_name_clean = regexp_replace(drug_name_clean, '\/ \d+\ /\ *', '', 'gi')
-where rxcui is null
-  and drug_name_clean ~* '.*\/ \d+\ /.*';
+WHERE rxcui IS NULL
+  AND drug_name_clean ~* '.*\/ \d+\ /.*';
 
 -- name: remove_remove_nnn
-update faers.drug_mapping a
+UPDATE faers.drug_mapping a
 SET drug_name_clean = regexp_replace(drug_name_clean, '\/\d+\/\ *', '', 'gi')
-where rxcui is null
-  and drug_name_clean ~* '.*\/\d+\/.*';
+WHERE rxcui IS NULL
+  AND drug_name_clean ~* '.*\/\d+\/.*';
 
 -- name: remove_empty_parenthesis
-update faers.drug_mapping
-set drug_name_clean = regexp_replace(drug_name_clean, '\(\)', '', 'gi')
-where drug_name_clean like '%()%'
-  and rxcui is null;
+UPDATE faers.drug_mapping
+SET drug_name_clean = regexp_replace(drug_name_clean, '\(\)', '', 'gi')
+WHERE drug_name_clean LIKE '%()%'
+  AND rxcui IS NULL;

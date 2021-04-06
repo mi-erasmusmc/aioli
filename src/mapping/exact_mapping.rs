@@ -1,14 +1,14 @@
-use std::{thread, time};
-use std::collections::{BTreeSet, HashMap, HashSet};
 use std::collections::hash_map::RandomState;
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::error::Error;
 use std::hash::Hash;
 use std::time::Instant;
+use std::{thread, time};
 
 use csv::Reader;
 use deadpool::managed::Object;
-use deadpool_postgres::{ClientWrapper, Pool};
 use deadpool_postgres::tokio_postgres::Row;
+use deadpool_postgres::{ClientWrapper, Pool};
 use rand::Rng;
 use rawsql::Loader;
 
@@ -26,13 +26,11 @@ pub async fn map(pool: &Pool) -> Result<(), Box<dyn Error>> {
     clean_drug_and_ai(&pool).await?;
 
     populate_brand_and_ingredient(&pool).await?;
-
     check_parentesiss(&pool).await?;
 
     clean_drug_and_ai(&pool).await?;
 
     populate_brand_and_ingredient(&pool).await?;
-
     populate_from_eu_art_57(&pool).await?;
 
     rxnormalizer::normalize_exact(&pool).await?;
@@ -48,8 +46,12 @@ pub async fn map(pool: &Pool) -> Result<(), Box<dyn Error>> {
     let client = pool.get().await.unwrap();
     execute("pin_to_in", &client, &queries).await;
 
-    remap_rx_dose_form(&pool).await?;
+    remap_rx_dose_form(&pool, 1).await?;
     do_mapping(&pool).await?;
+    remap_rx_dose_form(&pool, 2).await?;
+    do_mapping(&pool).await?;
+
+    to_atc(&pool).await?;
 
     Ok(())
 }
@@ -174,7 +176,7 @@ async fn populate_from_eu_art_57(pool: &Pool) -> Result<(), Box<dyn Error>> {
         &client,
         &queries,
     )
-        .await;
+    .await;
     execute("article_57_multi_ingr", &client, &queries).await;
     execute("set_prod_ai", &client, &queries).await;
 
@@ -422,13 +424,14 @@ async fn map_to_scdc(pool: &Pool) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-async fn remap_rx_dose_form(pool: &Pool) -> Result<(), Box<dyn Error>> {
+async fn remap_rx_dose_form(pool: &Pool, round: i8) -> Result<(), Box<dyn Error>> {
     let queries = Loader::get_queries_from("sql/exact_mapping/reinterpret.sql")?.queries;
     let client = pool.get().await?;
     let q = queries.get("remap_rx_df").unwrap();
 
     let stmt = client.prepare(q).await?;
-    let mut csv = Reader::from_path("manual_mappings/remap_df.csv")?;
+    let file = format!("manual_mappings/remap_df_{}.csv", round);
+    let mut csv = Reader::from_path(file)?;
     for record in csv.deserialize() {
         let result: (String, String) = record?;
         println!(
@@ -437,6 +440,27 @@ async fn remap_rx_dose_form(pool: &Pool) -> Result<(), Box<dyn Error>> {
         );
         client.execute(&stmt, &[&result.0, &result.1]).await?;
     }
+    Ok(())
+}
+
+async fn to_atc(pool: &Pool) -> Result<(), Box<dyn Error>> {
+    let start = Instant::now();
+    let client = pool.get().await?;
+    let queries = Loader::get_queries_from("sql/exact_mapping/map_to_atc.sql")
+        .unwrap()
+        .queries;
+
+    println!("Final mapping to ATC");
+    execute("set_atc_string_1", &client, &queries).await;
+    execute("set_atc_string_2", &client, &queries).await;
+    execute("set_rxcui_for_ing", &client, &queries).await;
+    execute("exact_from_patch", &client, &queries).await;
+    execute("infer_from_patch", &client, &queries).await;
+    execute("infer_from_patch_single_in", &client, &queries).await;
+    execute("from_rxnconso", &client, &queries).await;
+
+    let duration = start.elapsed().as_secs_f32() / 60f32;
+    println!("Finished mapping to SCDC in {:.2} minutes", duration);
     Ok(())
 }
 
@@ -478,8 +502,10 @@ async fn rx_dose_form(pool: &Pool) -> Result<(), Box<dyn Error>> {
 }
 
 pub async fn update(query: String, client: &Object<ClientWrapper, tokio_postgres::Error>) {
+    let start = Instant::now();
     let count = client.execute(query.as_str(), &[]).await.unwrap();
-    println!("Altered {} rows", count);
+    let seconds = start.elapsed().as_secs_f32();
+    println!("{} rows affected in {:.2}", count, seconds);
 }
 
 // Postgres can perform parallel queries on its own, but I've found this workaround to be significantly faster

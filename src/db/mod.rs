@@ -5,8 +5,8 @@ use std::time::Instant;
 
 use config::Config;
 use deadpool::managed::Object;
-use deadpool_postgres::{ClientWrapper, Manager, ManagerConfig, Pool, RecyclingMethod};
 use deadpool_postgres::tokio_postgres::Error;
+use deadpool_postgres::{ClientWrapper, Manager, ManagerConfig, Pool, RecyclingMethod};
 use tokio_postgres::NoTls;
 
 pub async fn execute(

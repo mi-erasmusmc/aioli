@@ -30,8 +30,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Initializing DB pool...");
     let pool = db::init_db_pool(&settings);
 
-
-    let map_atc = !settings.get_bool("map_atc").unwrap();
+    let map_atc = settings.get_bool("map_atc").unwrap();
     if map_atc {
         mapping::map_atc(&pool).await?;
     }

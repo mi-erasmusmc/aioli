@@ -9,7 +9,7 @@ SELECT DISTINCT drug_name_original,
                 update_method,
                 rxcui,
                 standard_concept_id,
-                sum(occurrences) as occurrences
+                sum(occurrences) AS occurrences
 FROM (
          SELECT drugname              AS drug_name_original,
                 lower(drugname)       AS drug_name_clean,
@@ -20,7 +20,7 @@ FROM (
                 count(*)              AS occurrences
          FROM faers.drug a
                   INNER JOIN faers.unique_all_case b
-                             on a.primaryid = b.primaryid
+                             ON a.primaryid = b.primaryid
          WHERE b.isr IS NULL
          GROUP BY drugname, lower(drugname)
          UNION

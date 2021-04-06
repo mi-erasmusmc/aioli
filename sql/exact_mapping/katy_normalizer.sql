@@ -1,41 +1,41 @@
-with cte as (select distinct dme.drugname_clean, LOWER(mr.str) AS str, out.match, dme.occurrences
-             from faers.mrconso mr
-                      join faers.output out on out.cui = mr.cui
-                      join faers.drug_mapping_exact dme
-                           on dme.drugname_clean = LOWER(replace(out.drugname_clean, ' w ', ' / '))
-             where mr.sab = 'RXNORM'
-               and mr.c13 in ('MIN', 'IN', 'PIN')
-               and out.match > 0.59
-               and mr.str like '%]'
-               and dme.rx_ingredient is null)
+WITH cte AS (SELECT DISTINCT dme.drugname_clean, lower(mr.str) AS str, out.match, dme.occurrences
+             FROM faers.mrconso mr
+                      JOIN faers.output out ON out.cui = mr.cui
+                      JOIN faers.drug_mapping_exact dme
+                           ON dme.drugname_clean = lower(replace(out.drugname_clean, ' w ', ' / '))
+             WHERE mr.sab = 'RXNORM'
+               AND mr.c13 IN ('MIN', 'IN', 'PIN')
+               AND out.match > 0.59
+               AND mr.str LIKE '%]'
+               AND dme.rx_ingredient IS NULL)
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient = cte.str
 FROM cte
 WHERE cte.drugname_clean = dme.drugname_clean
-  and dme.rx_ingredient is null;
+  AND dme.rx_ingredient IS NULL;
 
 
-with cte as (select distinct dme.drugname_clean,
-                             lower(mr.str)                   as string,
+WITH cte AS (SELECT DISTINCT dme.drugname_clean,
+                             lower(mr.str)                   AS string,
                              dme.rx_dose_form,
                              (CASE
                                   WHEN lower(mr.str) LIKE '%disintegrating oral tablet'
                                       THEN 'disintegrating oral tablet'
                                   WHEN lower(mr.str) LIKE '%extended release oral tablet'
-                                      then 'extended release oral tablet'
+                                      THEN 'extended release oral tablet'
                                   WHEN lower(mr.str) LIKE '%delayed release oral capsule'
-                                      then 'delayed release oral capsule'
+                                      THEN 'delayed release oral capsule'
                                   ELSE dme.rx_dose_form END) AS dose_form
-             from faers.mrconso mr
-                      join faers.output out on out.cui = mr.cui
-                      join faers.drug_mapping_exact dme
-                           on dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
-             where mr.sab = 'RXNORM'
-               and out.match > 0.59
-               and dme.rx_ingredient is null
-               and mr.c13 = 'SCDF'
-               and lower(mr.str) like concat('% ', dme.rx_dose_form)
-               and dme.rx_dose_form like '% %')
+             FROM faers.mrconso mr
+                      JOIN faers.output out ON out.cui = mr.cui
+                      JOIN faers.drug_mapping_exact dme
+                           ON dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
+             WHERE mr.sab = 'RXNORM'
+               AND out.match > 0.59
+               AND dme.rx_ingredient IS NULL
+               AND mr.c13 = 'SCDF'
+               AND lower(mr.str) LIKE concat('% ', dme.rx_dose_form)
+               AND dme.rx_dose_form LIKE '% %')
 UPDATE faers.drug_mapping_exact dme
 SET rx_dose_form  = cte.dose_form,
     rx_ingredient = replace(cte.string, concat(' ', cte.dose_form), '')
@@ -43,79 +43,79 @@ FROM cte
 WHERE cte.drugname_clean = dme.drugname_clean;
 
 -- name: exactly_one_space_in_scdf
-with cte as (select distinct dme.drugname_clean,
-                             lower(mr.str)                             as string,
+WITH cte AS (SELECT DISTINCT dme.drugname_clean,
+                             lower(mr.str)                             AS string,
                              lower(regexp_replace(mr.str, '^.* ', '')) AS dose_form
-             from faers.mrconso mr
-                      join faers.output out on out.cui = mr.cui
-                      join faers.drug_mapping_exact dme
-                           on dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
-             where mr.sab = 'RXNORM'
-               and out.match > 0.59
-               and dme.rx_ingredient is null
-               and mr.str ~* '^[^\s]+\s[^\s]+$'
-               and mr.c13 = 'SCDF')
+             FROM faers.mrconso mr
+                      JOIN faers.output out ON out.cui = mr.cui
+                      JOIN faers.drug_mapping_exact dme
+                           ON dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
+             WHERE mr.sab = 'RXNORM'
+               AND out.match > 0.59
+               AND dme.rx_ingredient IS NULL
+               AND mr.str ~* '^[^\s]+\s[^\s]+$'
+               AND mr.c13 = 'SCDF')
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient = replace(cte.string, concat(' ', cte.dose_form), ''),
     rx_dose_form  = cte.dose_form
-from cte
-where cte.drugname_clean = dme.drugname_clean;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean;
 
 
-with cte as (select distinct dme.drugname_clean,
-                             lower(mr.str) as string,
+WITH cte AS (SELECT DISTINCT dme.drugname_clean,
+                             lower(mr.str) AS string,
                              dme.occurrences,
                              (CASE
                                   WHEN lower(mr.str) LIKE '%disintegrating oral tablet'
                                       THEN 'disintegrating oral tablet'
                                   WHEN lower(mr.str) LIKE '%extended release oral tablet'
-                                      then 'extended release oral tablet'
+                                      THEN 'extended release oral tablet'
                                   WHEN lower(mr.str) LIKE '%delayed release oral capsule'
-                                      then 'delayed release oral capsule'
+                                      THEN 'delayed release oral capsule'
                                   WHEN lower(mr.str) LIKE '%transdermal system'
-                                      then 'transdermal system'
+                                      THEN 'transdermal system'
                                   WHEN lower(mr.str) LIKE '%drug implant'
-                                      then 'drug implant'
+                                      THEN 'drug implant'
                                   WHEN lower(mr.str) LIKE '%inhalation powder'
-                                      then 'inhalation powder'
+                                      THEN 'inhalation powder'
                                   WHEN lower(mr.str) LIKE '%oral capsule'
-                                      then 'oral capsule'
+                                      THEN 'oral capsule'
                                   WHEN lower(mr.str) LIKE '%oral tablet'
                                       THEN 'oral tablet'
                                   WHEN lower(mr.str) LIKE '%topical cream'
-                                      then 'topical cream'
+                                      THEN 'topical cream'
                                   WHEN lower(mr.str) LIKE '%prefilled syringe'
-                                      then 'prefilled syringe'
+                                      THEN 'prefilled syringe'
                                   WHEN lower(mr.str) LIKE '%ophthalmic ointment'
-                                      then 'ophthalmic ointment'
+                                      THEN 'ophthalmic ointment'
                                   WHEN lower(mr.str) LIKE '%topical gel'
-                                      then 'topical gel'
+                                      THEN 'topical gel'
                                   WHEN lower(mr.str) LIKE '%oral lozenge'
-                                      then 'oral lozenge'
+                                      THEN 'oral lozenge'
                                   WHEN lower(mr.str) LIKE '%metered dose inhaler'
-                                      then 'metered dose inhaler'
+                                      THEN 'metered dose inhaler'
                                   WHEN lower(mr.str) LIKE '%topical ointment'
-                                      then 'topical ointment'
+                                      THEN 'topical ointment'
                                   WHEN lower(mr.str) LIKE '%rectal suppository'
-                                      then 'rectal suppository'
+                                      THEN 'rectal suppository'
                                   WHEN lower(mr.str) LIKE '%oral solution'
-                                      then 'oral solution'
+                                      THEN 'oral solution'
                                   WHEN lower(mr.str) LIKE '%topical lotion'
-                                      then 'topical lotion'
+                                      THEN 'topical lotion'
                                   WHEN lower(mr.str) LIKE '%vaginal cream'
-                                      then 'vaginal cream'
+                                      THEN 'vaginal cream'
                                   WHEN lower(mr.str) LIKE '%injection'
-                                      then 'injection'
+                                      THEN 'injection'
                                   WHEN lower(mr.str) LIKE '%mouthwash'
-                                      then 'mouthwash'
+                                      THEN 'mouthwash'
                                   WHEN lower(mr.str) LIKE '%topical oil'
-                                      then 'topical oil'
+                                      THEN 'topical oil'
                                   WHEN lower(mr.str) LIKE '%topical foam'
-                                      then 'topical foam'
+                                      THEN 'topical foam'
                                   WHEN lower(mr.str) LIKE '%ophthalmic solution'
-                                      then 'ophthalmic solution'
+                                      THEN 'ophthalmic solution'
                                   WHEN lower(mr.str) LIKE '%metered dose nasal spray'
-                                      then 'metered dose nasal spray'
+                                      THEN 'metered dose nasal spray'
                                   WHEN lower(mr.str) LIKE '%oral suspension'
                                       THEN 'oral suspension'
                                   WHEN lower(mr.str) LIKE '%chewable tablet'
@@ -131,58 +131,58 @@ with cte as (select distinct dme.drugname_clean,
                                   WHEN lower(mr.str) LIKE '%ophthalmic suspension'
                                       THEN 'ophthalmic suspension'
                                  END)      AS dose_form
-             from faers.mrconso mr
-                      join faers.output out on out.cui = mr.cui
-                      join faers.drug_mapping_exact dme
-                           on dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
-             where mr.sab = 'RXNORM'
-               and out.match > 0.59
-               and dme.rx_ingredient is null
-               and mr.c13 = 'SCDF')
+             FROM faers.mrconso mr
+                      JOIN faers.output out ON out.cui = mr.cui
+                      JOIN faers.drug_mapping_exact dme
+                           ON dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
+             WHERE mr.sab = 'RXNORM'
+               AND out.match > 0.59
+               AND dme.rx_ingredient IS NULL
+               AND mr.c13 = 'SCDF')
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient = replace(cte.string, concat(' ', cte.dose_form), ''),
     rx_dose_form  = cte.dose_form
-from cte
-where cte.drugname_clean = dme.drugname_clean;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean;
 
 
 -- and mr.c13 not in ('SY', 'TMSY')
 
 
-with cte as (select distinct dme.drugname_clean,
-                             lower(mr.str)                             as string,
-                             lower(regexp_replace(mr.str, '^.* ', '')) as unit,
+WITH cte AS (SELECT DISTINCT dme.drugname_clean,
+                             lower(mr.str)                             AS string,
+                             lower(regexp_replace(mr.str, '^.* ', '')) AS unit,
                              substring(mr.str, '[0-9]+[.]?[0-9]*')     AS amount
-             from faers.mrconso mr
-                      join faers.output out on out.cui = mr.cui
-                      join faers.drug_mapping_exact dme
-                           on dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
-             where mr.sab = 'RXNORM'
-               and mr.c13 = 'SCDC'
-               and dme.rx_ingredient is null)
+             FROM faers.mrconso mr
+                      JOIN faers.output out ON out.cui = mr.cui
+                      JOIN faers.drug_mapping_exact dme
+                           ON dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
+             WHERE mr.sab = 'RXNORM'
+               AND mr.c13 = 'SCDC'
+               AND dme.rx_ingredient IS NULL)
 UPDATE faers.drug_mapping_exact dme
 SET rx_ingredient   = replace(cte.string, concat(' ', cte.amount, ' ', cte.unit), ''),
     dose_unit_clean = cte.unit,
     dose_amt_clean  = cte.amount
-from cte
-where cte.drugname_clean = dme.drugname_clean;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean;
 
-with cte as (select distinct dme.drugname_clean,
-                             lower(mr.str) as string,
+WITH cte AS (SELECT DISTINCT dme.drugname_clean,
+                             lower(mr.str) AS string,
                              mr.c13,
                              out.match,
                              mr.c14
-             from faers.mrconso mr
-                      join faers.output out on out.cui = mr.cui
-                      join faers.drug_mapping_exact dme
-                           on dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
-             where mr.sab = 'RXNORM'
-               and mr.c13 = 'SCD'
-               and dme.drugname_clean ~ '.*[0-9].*'
-               and dme.rxcui is null)
+             FROM faers.mrconso mr
+                      JOIN faers.output out ON out.cui = mr.cui
+                      JOIN faers.drug_mapping_exact dme
+                           ON dme.drugname_clean = replace(out.drugname_clean, ' w ', ' / ')
+             WHERE mr.sab = 'RXNORM'
+               AND mr.c13 = 'SCD'
+               AND dme.drugname_clean ~ '.*[0-9].*'
+               AND dme.rxcui IS NULL)
 UPDATE faers.drug_mapping_exact dme
 SET str   = cte.string,
     tty   = cte.c13,
     rxcui = cte.c14
-from cte
-where cte.drugname_clean = dme.drugname_clean;
+FROM cte
+WHERE cte.drugname_clean = dme.drugname_clean;

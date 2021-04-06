@@ -3,47 +3,47 @@
 
 -- note the following table should be created one time when the FDA orange book (NDA ingredient lookup) table is loaded
 -- name: drop_nda_lookup_table
-drop table if exists faers.nda_ingredient;
+DROP TABLE IF EXISTS faers.nda_ingredient;
 -- name: create_nda_lookup_table
-create table faers.nda_ingredient as
-select distinct appl_no, ingredient, trade_name
-from faers.nda;
+CREATE TABLE faers.nda_ingredient AS
+SELECT DISTINCT appl_no, ingredient, trade_name
+FROM faers.nda;
 
 -- name: drop_nda_mapping
-drop table if exists faers.drug_nda_mapping;
+DROP TABLE IF EXISTS faers.drug_nda_mapping;
 -- name: create_nda_mapping
-create table faers.drug_nda_mapping as
-select distinct drug_name_original, nda_num, nda_ingredient, concept_id, update_method, rxcui
-from (
-         select distinct drugname              as drug_name_original,
+CREATE TABLE faers.drug_nda_mapping AS
+SELECT DISTINCT drug_name_original, nda_num, nda_ingredient, concept_id, update_method, rxcui
+FROM (
+         SELECT DISTINCT drugname              AS drug_name_original,
                          nda_num,
-                         null                  as nda_ingredient,
-                         cast(null as integer) as concept_id,
-                         null                  as update_method,
-                         null                  as rxcui
-         from faers.drug a
-                  inner join faers.unique_all_case b
-                             on a.primaryid = b.primaryid
-         where b.isr is null
-           and nda_num is not null
-         union
-         select distinct drugname              as drug_name_original,
-                         cast(nda_num as varchar),
-                         null                  as nda_ingredient,
-                         cast(null as integer) as concept_id,
-                         null                  as update_method,
-                         null                  as rxcui
-         from faers.drug_legacy a
-                  inner join faers.unique_all_case b
-                             on cast(a.isr as varchar) = b.isr
-         where b.isr is not null
-           and nda_num is not null
+                         NULL                  AS nda_ingredient,
+                         cast(NULL AS INTEGER) AS concept_id,
+                         NULL                  AS update_method,
+                         NULL                  AS rxcui
+         FROM faers.drug a
+                  INNER JOIN faers.unique_all_case b
+                             ON a.primaryid = b.primaryid
+         WHERE b.isr IS NULL
+           AND nda_num IS NOT NULL
+         UNION
+         SELECT DISTINCT drugname              AS drug_name_original,
+                         cast(nda_num AS VARCHAR),
+                         NULL                  AS nda_ingredient,
+                         cast(NULL AS INTEGER) AS concept_id,
+                         NULL                  AS update_method,
+                         NULL                  AS rxcui
+         FROM faers.drug_legacy a
+                  INNER JOIN faers.unique_all_case b
+                             ON cast(a.isr AS VARCHAR) = b.isr
+         WHERE b.isr IS NOT NULL
+           AND nda_num IS NOT NULL
      ) aa;
 
 -- name: drop_nda_index
-drop index if exists faers.nda_num_ix;
+DROP INDEX IF EXISTS faers.nda_num_ix;
 -- name: create_nda_index
-create index nda_num_ix on faers.drug_nda_mapping (nda_num);
+CREATE INDEX nda_num_ix ON faers.drug_nda_mapping (nda_num);
 -- name: set_nda_ingredient
 UPDATE faers.drug_nda_mapping a
 SET nda_ingredient = lower(ndai.ingredient)
@@ -52,7 +52,7 @@ WHERE ndai.appl_no = a.nda_num;
 
 
 -- name: map_nda_ingredient_to_rxnorm
-WITH cte AS (SELECT a.drug_name_original, string_agg(DISTINCT CAST(rx.rxcui AS varchar), ',') AS rxcui
+WITH cte AS (SELECT a.drug_name_original, string_agg(DISTINCT cast(rx.rxcui AS VARCHAR), ',') AS rxcui
              FROM faers.drug_nda_mapping a
                       JOIN faers.rxnconso rx
                            ON lower(rx.str) = lower(a.nda_ingredient)
@@ -64,7 +64,7 @@ FROM cte
 WHERE cte.drug_name_original = a.drug_name_original;
 
 -- name: update_concept_ids
-UPDATE faers.drug_nda_mapping as drm
+UPDATE faers.drug_nda_mapping AS drm
 SET concept_id = c.concept_id
 FROM staging_vocabulary.concept c
 WHERE drm.rxcui = c.concept_code

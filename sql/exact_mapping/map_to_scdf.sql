@@ -1,68 +1,68 @@
 -- name: exact
-with cte1 as (select string_agg(distinct cast(r.rxcui as text), ',') as rxcui,
+WITH cte1 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                      m.id
-              from faers.rxnconso r
-                       join
+              FROM faers.rxnconso r
+                       JOIN
                    faers.drug_mapping_exact m
-                   on lower(r.str) =
+                   ON lower(r.str) =
                       lower(concat(m.rx_ingredient, ' ', m.rx_dose_form))
-              where m.rx_ingredient is not null
-                and m.rx_dose_form is not null
-                and m.rxcui is null
-                and r.tty = 'SCDF'
-                and r.sab = 'RXNORM'
-                and r.suppress != 'O'
-              group by m.id, r.str
-              having count(distinct r.rxcui) = 1)
-update faers.drug_mapping_exact m
-set rxcui = cte1.rxcui,
+              WHERE m.rx_ingredient IS NOT NULL
+                AND m.rx_dose_form IS NOT NULL
+                AND m.rxcui IS NULL
+                AND r.tty = 'SCDF'
+                AND r.sab = 'RXNORM'
+                AND r.suppress != 'O'
+              GROUP BY m.id, r.str
+              HAVING count(DISTINCT r.rxcui) = 1)
+UPDATE faers.drug_mapping_exact m
+SET rxcui = cte1.rxcui,
     tty   = 'SCDF'
-from cte1
-where cte1.id = m.id;
+FROM cte1
+WHERE cte1.id = m.id;
 
 
 -- name: loose
-WITH cte1 AS (select distinct rx_ingredient as ing, rx_dose_form as rxdf
-              from faers.drug_mapping_exact
-              where rx_ingredient is not null
-                and rx_dose_form is not null
-                and rxcui is null),
-     cte2 as (select string_agg(distinct cast(r.rxcui as text), ',') as rxcui,
+WITH cte1 AS (SELECT DISTINCT rx_ingredient AS ing, rx_dose_form AS rxdf
+              FROM faers.drug_mapping_exact
+              WHERE rx_ingredient IS NOT NULL
+                AND rx_dose_form IS NOT NULL
+                AND rxcui IS NULL),
+     cte2 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                      cte1.ing,
                      cte1.rxdf
-              from faers.rxnconso r
-                       join
+              FROM faers.rxnconso r
+                       JOIN
                    cte1
-                   on lower(r.str) like
+                   ON lower(r.str) LIKE
                       concat(cte1.ing, '%', cte1.rxdf, '%')
-                       and r.tty = 'SCD'
-                       and r.sab = 'RXNORM'
-                       and r.suppress != 'O'
-              group by cte1.ing, cte1.rxdf
-              having count(distinct r.rxcui) = 1)
-update faers.drug_mapping_exact m
-set rxcui = cte2.rxcui,
+                       AND r.tty = 'SCD'
+                       AND r.sab = 'RXNORM'
+                       AND r.suppress != 'O'
+              GROUP BY cte1.ing, cte1.rxdf
+              HAVING count(DISTINCT r.rxcui) = 1)
+UPDATE faers.drug_mapping_exact m
+SET rxcui = cte2.rxcui,
     tty   = 'SCD'
-from cte2
-where cte2.ing = m.rx_ingredient
-  and cte2.rxdf = m.rx_dose_form
-  and m.rxcui is null;
+FROM cte2
+WHERE cte2.ing = m.rx_ingredient
+  AND cte2.rxdf = m.rx_dose_form
+  AND m.rxcui IS NULL;
 
 -- name: drug_clean
-with cte1 as (select distinct drugname_clean, string_agg(distinct cast(r2.rxcui as text), ',') as cui
-              from faers.drug_mapping_exact m
-                       join faers.rxnconso r on m.drugname_clean = lower(r.str)
-                       join faers.rxnconso r2 on r.rxcui = r2.rxcui
-              where r2.tty = 'SCDF'
-                and r2.sab = 'RXNORM'
-                and r2.suppress != 'O'
-                and m.rxcui is null
-                and m.rx_ingredient is null
-              group by drugname_clean
-              having count(distinct r2.rxcui) = 1)
-update faers.drug_mapping_exact m
-set rxcui = cte1.cui,
+WITH cte1 AS (SELECT DISTINCT drugname_clean, string_agg(DISTINCT cast(r2.rxcui AS TEXT), ',') AS cui
+              FROM faers.drug_mapping_exact m
+                       JOIN faers.rxnconso r ON m.drugname_clean = lower(r.str)
+                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+              WHERE r2.tty = 'SCDF'
+                AND r2.sab = 'RXNORM'
+                AND r2.suppress != 'O'
+                AND m.rxcui IS NULL
+                AND m.rx_ingredient IS NULL
+              GROUP BY drugname_clean
+              HAVING count(DISTINCT r2.rxcui) = 1)
+UPDATE faers.drug_mapping_exact m
+SET rxcui = cte1.cui,
     tty   = 'SCDF'
-from cte1
-where cte1.drugname_clean = m.drugname_clean
-  and rxcui is null;
+FROM cte1
+WHERE cte1.drugname_clean = m.drugname_clean
+  AND rxcui IS NULL;
