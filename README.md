@@ -2,12 +2,12 @@ FAERS DRUG STANDARDIZER (AIOLI)
 =======================
 
 **The FAERS drug standardizer is a tool to be used in combination with AEOLUS for a larger and more accurate mapping of
-the FEARS data to RxNORM CUIs and OMOP standard ingredient concept ids, it can fully replace the AEOLUS drug_mapping
-scripts.**
+the FEARS data to RxNORM CUIs and OMOP standard ingredient concept ids. It also allows for standardization to ATC rather
+than RxNorm. Principally it can fully replace the AEOLUS drug_mapping scripts.**
 
 Note:
-This project principally works but is still under construction. Contributions, comments and suggestions are very much
-welcome.
+The master branch of this project should work, but the project as whole is still under construction. Contributions,
+comments and suggestions are very much welcome.
 
 ### REQUIREMENTS
 
@@ -25,37 +25,41 @@ welcome.
 
 - To build and run the app you will need [Rust](www.rust-lang.org)
 
+- To make use of the feature to map to ATC codes you need to:
+    - Load
+      the [Article 57 Data](https://www.ema.europa.eu/en/human-regulatory/post-authorisation/data-medicines-iso-idmp-standards/public-data-article-57-database)
+      from the xls file available there copy *name*, *ingredient* and *route* columns into a table called *article* (
+      TODO: automate this step)
+    - Obtain the mapping from RxNorm to ATC being developed at the ErasmusMC Medical Informatics department, get in
+      touch for more details.
+
 ### HOW TO RUN
 
-- Make sure the db is configured in accordance to your needs in the db module. `src\db\mod.rs` then the init_db method.
+- Make sure the db is configured in accordance to your needs in the Settings.toml file.
 
 - Use `cargo run --release` in the present folder to build and run the app (it runs for several hours, see options below
   for a faster run)
 
 ### OPTIONS
 
-There are two settings that you can configure by passing arguments when running the app.
+There are three settings that you can configure in the Settings.toml file.
 
-1. You can skip calling the RxNormalizer, the RxNormalizer is an API that allows to find RxNorm ids based on a string
-   and accounts for common typos and alternative spellings, pulling all 600.000 unique strings in the FAERS data through
-   this api takes over a day (currently we do only the 60.000 most common strings, to save some time (can change the
-   limit in the rxnormalizer.sql file)) (rxnav throttle the amount of request to 20 per second, there is a docker image
-   you could download and call as fast your computer can handle in stead, but loading that image also take a while).
-   Skipping the api calls will still give you a pretty decent amount of matches. To skip the API calls run the app
-   with `cargo run --release -- skip-normalizer` (yes there needs to be a space between -- and skip-normalizer)
+1. *skip_normalizer* You can skip calling the RxNormalizer, the RxNormalizer is an API that allows to find RxNorm ids
+   based on a string and accounts for common typos and alternative spellings, pulling all 600.000 unique strings in the
+   FAERS data through this api takes over a day (currently we do only the 60.000 most common strings, to save some
+   time (can change the limit in the rxnormalizer.sql file)) (rxnav throttle the amount of request to 20 per second,
+   there is a docker image you could download and call as fast your computer can handle in stead, but loading that image
+   also take a while). Skipping the api calls will still give you a pretty decent amount of matches.
 
-2. In the original mapping section of AEOLUS the idea was to include multi-ingredient drugs in the roll up, the present
-   implementation splits the multi-ingredient drugs to single ingredient entries (you can still find the
-   multi-ingredient entries in the mapping before they are converted to 'standardized' ids). If you prefer to retain
-   multi-ingredient drugs in the final roll up run with `cargo run --release -- retain-multi`
+2. *retain_multi* In the original mapping section of AEOLUS the idea was to include multi-ingredient drugs in the roll
+   up, the present implementation splits the multi-ingredient drugs to single ingredient entries (you can still find the
+   multi-ingredient entries in the mapping before they are converted to 'standardized' ids).
 
-You want to retain-multi and skip-normalizer? Then use `cargo run --release -- skip-normalizer retain-multi`
+3. *use_atc* Set this option to true to normalize the drugs to ATC codes. This feature is still **experimental**
 
 #### TODO:
 
-- Get a more exact mapping of fears drug data before moving to the roll up by using the route and dose info present in
-  faers (expected March 2021)
-- Add a configuration file for db settings, run options, rxnav limit whatever needs configuring.
+- Add a configuration for rxnav limit.
 - Replace aeolus in its entirety (with ability to update your existing data, with single command and without doing all
   the whole downloading and mapping steps from scratch).
 

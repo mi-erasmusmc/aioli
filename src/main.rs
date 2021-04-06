@@ -1,6 +1,6 @@
 use std::env;
 use std::error::Error;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use crate::mapping::{
     create_final_tables, create_mapping_table, initial_basic_mapping, map_rx_to_cdm_concept_id,
@@ -15,20 +15,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("Starting the Aioli (a mediterranean sauce)");
     let start = Instant::now();
 
-    let args: Vec<String> = env::args().collect();
-    let skip_normalizer = args.contains(&"skip-normalizer".to_string());
+    let mut settings = config::Config::default();
+    settings.merge(config::File::with_name("Settings")).unwrap();
+
+    let skip_normalizer = settings.get_bool("skip_normalizer").unwrap();
     if skip_normalizer {
         println!("Not calling the RxNormalizer")
     }
-    let split_multi = !args.contains(&"retain-multi".to_string());
+    let split_multi = !settings.get_bool("retain_multi").unwrap();
     if !split_multi {
         println!("Retaining multi ingredient drugs")
     }
 
     println!("Initializing DB pool...");
-    let pool = db::init_db_pool();
+    let pool = db::init_db_pool(&settings);
 
-    mapping::do_exact_mapping(&pool).await?;
+
+    let map_atc = !settings.get_bool("map_atc").unwrap();
+    if map_atc {
+        mapping::map_atc(&pool).await?;
+    }
 
     // println!("Starting Drug Mapping...");
     // create_mapping_table(&pool).await?;

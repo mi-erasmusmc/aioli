@@ -3,9 +3,10 @@ use std::io;
 use std::io::Write;
 use std::time::Instant;
 
+use config::Config;
 use deadpool::managed::Object;
-use deadpool_postgres::tokio_postgres::Error;
 use deadpool_postgres::{ClientWrapper, Manager, ManagerConfig, Pool, RecyclingMethod};
+use deadpool_postgres::tokio_postgres::Error;
 use tokio_postgres::NoTls;
 
 pub async fn execute(
@@ -45,12 +46,13 @@ pub async fn execute_param(
     result
 }
 
-pub fn init_db_pool() -> Pool {
+pub fn init_db_pool(config: &Config) -> Pool {
     let mut pg_config = tokio_postgres::Config::new();
-    pg_config.port(5432);
-    pg_config.host("localhost");
-    pg_config.user("rowan");
-    pg_config.dbname("cem");
+    pg_config.port(config.get_int("pg_port").unwrap() as u16);
+    pg_config.host(&*config.get_str("pg_host").unwrap());
+    pg_config.user(&*config.get_str("pg_user").unwrap());
+    pg_config.dbname(&*config.get_str("pg_dbname").unwrap());
+    pg_config.password(&*config.get_str("pg_password").unwrap());
     let mgr_config = ManagerConfig {
         recycling_method: RecyclingMethod::Fast,
     };

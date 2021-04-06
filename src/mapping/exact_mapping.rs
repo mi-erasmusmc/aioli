@@ -93,7 +93,7 @@ pub async fn clean_dose_form(pool: &Pool) -> Result<(), Box<dyn Error>> {
     // Populate the 'clean' dose form and columns removing parenthesis dots and commas
     for target in columns.iter() {
         let query = format!("update faers.drug_mapping_exact set {tc} = concat(' ', regexp_replace({t}, '[\\(\\)\\,\\.]', '', 'gi'), ' ')", tc = target, t = target.replace("_clean", ""));
-        update(query, &client_1)
+        update(query, &client_1).await;
     }
 
     // Get manual mapping to convert routes and dose forms unknown to rxnorm
@@ -132,7 +132,7 @@ pub async fn clean_dose_form(pool: &Pool) -> Result<(), Box<dyn Error>> {
         );
 
         for q in vec![q1, q2, q3, q4, q5] {
-            update(q, &client_1);
+            update(q, &client_1).await;
         }
     }
 
@@ -144,7 +144,7 @@ pub async fn clean_dose_form(pool: &Pool) -> Result<(), Box<dyn Error>> {
         .prepare(queries.get("df_in_drug").unwrap().as_str())
         .await?;
     for words in (1..6).rev() {
-        let altered = client_1.execute(&stmt, &[&words]).await?;
+        let altered = client_1.execute(&stmt, &[&words]).await.unwrap();
         println!("Rows alterd {}", altered)
     }
 

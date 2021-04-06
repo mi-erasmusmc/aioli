@@ -12,7 +12,7 @@ mod rx_to_standard;
 mod rxnormalizer;
 mod table_creator;
 
-pub async fn do_exact_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
+pub async fn map_atc(pool: &Pool) -> Result<(), Box<dyn Error>> {
     exact_mapping::map(pool).await?;
     Ok(())
 }
