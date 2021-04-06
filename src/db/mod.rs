@@ -17,7 +17,7 @@ pub async fn execute(
     let start = Instant::now();
 
     print!("Executing the {} query... ", query_name);
-    io::stdout().flush();
+    io::stdout().flush().unwrap();
 
     let result = client
         .execute(queries.get(query_name).unwrap().as_str(), &[])

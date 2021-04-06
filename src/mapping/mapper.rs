@@ -1,10 +1,11 @@
+use std::env;
+use std::error::Error;
+
 use deadpool_postgres::Pool;
 use rawsql::Loader;
 
 use crate::db::{execute, execute_param};
 use crate::mapping::{map_rx_to_cdm_concept_id, rxnormalizer};
-use std::env;
-use std::error::Error;
 
 pub async fn basic_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
     {

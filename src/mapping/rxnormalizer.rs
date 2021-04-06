@@ -6,7 +6,6 @@ use deadpool::managed::Object;
 use deadpool_postgres::{ClientWrapper, Pool};
 use futures::future::join4;
 use rawsql::Loader;
-use reqwest::Response;
 use tokio_postgres::Row;
 
 const RXNAV_URL: &str = "https://rxnav.nlm.nih.gov/REST/rxcui.json";

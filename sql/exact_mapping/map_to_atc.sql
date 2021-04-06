@@ -82,3 +82,46 @@ SET atc_code   = cte.atc,
 FROM cte
 WHERE s.rxcui = cte.rxcui
   AND s.atc_code IS NULL;
+
+-- name: create_atc_case_drug_current
+CREATE TABLE faers.atc_case_drug_c AS (SELECT a.primaryid,
+                                              drug_seq,
+                                              role_cod,
+                                              drm.atc_str    AS rx_str,
+                                              drm.atc_code   AS atc_code,
+                                              drm.atc_method AS atc_method
+                                       FROM faers.drug a
+                                                JOIN faers.drug_mapping_exact drm ON
+                                               coalesce(upper(a.drugname), 'a') = coalesce(drm.drugname, 'a') AND
+                                               coalesce(upper(a.prod_ai), 'a') = coalesce(drm.prod_ai, 'a') AND
+                                               coalesce(lower(a.route), 'a') = coalesce(drm.route, 'a') AND
+                                               coalesce(lower(a.dose_amt), 'a') = coalesce(drm.dose_amt, 'a') AND
+                                               coalesce(lower(a.dose_form), 'a') = coalesce(drm.dose_form, 'a') AND
+                                               coalesce(lower(a.dose_unit), 'a') = coalesce(drm.dose_unit, 'a') AND
+                                               coalesce(lower(a.nda_num), 'a') = coalesce(drm.nda_num, 'a')
+                                       WHERE drm.atc_code IS NOT NULL
+                                       GROUP BY a.primaryid, drug_seq, role_cod, drm.atc_str, drm.rxcui_final,
+                                                drm.atc_code,
+                                                drm.atc_method);
+
+-- name: create_atc_case_drug_legacy
+CREATE TABLE faers.atc_case_drug_l AS (SELECT a.isr,
+                                              drug_seq,
+                                              role_cod,
+                                              drm.atc_str    AS rx_str,
+                                              drm.atc_code   AS atc_code,
+                                              drm.atc_method AS atc_method
+                                       FROM faers.drug_legacy a
+                                                JOIN faers.drug_mapping_exact drm ON
+                                               coalesce(upper(a.drugname), 'a') = coalesce(drm.drugname, 'a') AND
+                                               coalesce(lower(a.route), 'a') = coalesce(drm.route, 'a') AND
+                                               coalesce(cast(a.nda_num AS TEXT), 'a') =
+                                               coalesce(drm.nda_num, 'a')
+                                       WHERE drm.atc_code IS NOT NULL
+                                         AND prod_ai IS NULL
+                                         AND dose_amt IS NULL
+                                         AND dose_form IS NULL
+                                         AND dose_unit IS NULL
+                                       GROUP BY a.isr, drug_seq, role_cod, drm.atc_str, drm.rxcui_final,
+                                                drm.atc_code,
+                                                drm.atc_method);

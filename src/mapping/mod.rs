@@ -1,9 +1,9 @@
+use std::error::Error;
+
 use deadpool_postgres::Pool;
 use rawsql::Loader;
 
 use crate::db::execute;
-
-use std::error::Error;
 
 mod exact_mapping;
 mod mapper;
@@ -39,7 +39,7 @@ pub async fn run_original_aeolus(pool: &Pool) {
     mapper::run_aeolus_mapping(&pool).await
 }
 
-pub async fn create_final_tables(pool: &Pool) {
+pub async fn create_final_tables(pool: &Pool, include_atc: bool) {
     println!("Creating the big final drug mapping table... takes a minute ... or 20");
     let queries = Loader::get_queries_from("sql/combined_drug_mapping.sql")
         .unwrap()
@@ -48,7 +48,23 @@ pub async fn create_final_tables(pool: &Pool) {
     execute("drop_scdm_table", &client, &queries).await;
     execute("create_scdm_table", &client, &queries).await;
     execute("drop_standard_case_drug", &client, &queries).await;
-    execute("create_standard_case_drug", &client, &queries).await;
+    if include_atc {
+        execute("expand_table_atc", &client, &queries).await;
+        execute("add_atc_current", &client, &queries).await;
+        execute("add_atc_legacy", &client, &queries).await;
+        execute("populate_atc_from_regular_mapping", &client, &queries).await;
+        execute(
+            "populate_atc_from_regular_mapping_standard_id",
+            &client,
+            &queries,
+        )
+        .await;
+        execute("populate_atc_from_regular_mapping_infer", &client, &queries).await;
+        execute("set_vocab_id_atc", &client, &queries).await;
+        execute("create_standard_case_drug_atc", &client, &queries).await;
+    } else {
+        execute("create_standard_case_drug_original", &client, &queries).await;
+    }
 }
 
 pub async fn roll_up(pool: &Pool, split_multi: bool) {

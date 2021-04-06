@@ -1,7 +1,5 @@
-use std::collections::hash_map::RandomState;
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::HashSet;
 use std::error::Error;
-use std::hash::Hash;
 use std::time::Instant;
 use std::{thread, time};
 
@@ -9,10 +7,9 @@ use csv::Reader;
 use deadpool::managed::Object;
 use deadpool_postgres::tokio_postgres::Row;
 use deadpool_postgres::{ClientWrapper, Pool};
-use rand::Rng;
 use rawsql::Loader;
 
-use crate::db::{execute, execute_param};
+use crate::db::execute;
 use crate::mapping::rxnormalizer;
 
 pub async fn map(pool: &Pool) -> Result<(), Box<dyn Error>> {
@@ -458,6 +455,8 @@ async fn to_atc(pool: &Pool) -> Result<(), Box<dyn Error>> {
     execute("infer_from_patch", &client, &queries).await;
     execute("infer_from_patch_single_in", &client, &queries).await;
     execute("from_rxnconso", &client, &queries).await;
+    execute("create_atc_case_drug_current", &client, &queries).await;
+    execute("create_atc_case_drug_legacy", &client, &queries).await;
 
     let duration = start.elapsed().as_secs_f32() / 60f32;
     println!("Finished mapping to SCDC in {:.2} minutes", duration);
