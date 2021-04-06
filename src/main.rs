@@ -1,16 +1,19 @@
-use crate::mapping::{
-    create_final_tables, create_mapping_table, initial_basic_mapping,
-    map_rx_to_cdm_concept_id, roll_up, run_original_aeolus, rxnormalize,
-};
 use std::env;
 use std::error::Error;
+use std::time::{Duration, Instant};
+
+use crate::mapping::{
+    create_final_tables, create_mapping_table, initial_basic_mapping, map_rx_to_cdm_concept_id,
+    roll_up, run_original_aeolus, rxnormalize,
+};
 
 mod db;
 mod mapping;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    println!("Starting the Aioli (a greek sauce)");
+    println!("Starting the Aioli (a mediterranean sauce)");
+    let start = Instant::now();
 
     let args: Vec<String> = env::args().collect();
     let skip_normalizer = args.contains(&"skip-normalizer".to_string());
@@ -38,5 +41,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // run_original_aeolus(&pool).await;
     // roll_up(&pool, split_multi).await;
     // create_final_tables(&pool).await;
+
+    let elapsed_secs = start.elapsed().as_secs();
+    let elapsed_mins = elapsed_secs / 60;
+    let hours = elapsed_secs / 3600;
+    let minutes = elapsed_mins % 60;
+    let seconds = elapsed_secs % 60;
+
+    println!(
+        "Your FEARS drug mapping has been Aioli-ed in {} hours {} minutes {} seconds",
+        hours, minutes, seconds
+    );
+
     Ok(())
 }

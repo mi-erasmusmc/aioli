@@ -22,7 +22,7 @@ pub async fn do_roll_up(pool: &Pool, split_multi: bool) {
             &client,
             &queries,
         )
-            .await;
+        .await;
         execute("delete_multi", &client, &queries).await;
     } else {
         execute(
@@ -30,7 +30,7 @@ pub async fn do_roll_up(pool: &Pool, split_multi: bool) {
             &client,
             &queries,
         )
-            .await;
+        .await;
     }
 
     execute(
@@ -38,7 +38,7 @@ pub async fn do_roll_up(pool: &Pool, split_multi: bool) {
         &client,
         &queries,
     )
-        .await;
+    .await;
     execute("clean_unmapped_multi", &client, &queries).await;
     execute("standardize_residue", &client, &queries).await;
     execute(
@@ -46,7 +46,7 @@ pub async fn do_roll_up(pool: &Pool, split_multi: bool) {
         &client,
         &queries,
     )
-        .await;
+    .await;
     execute("manual_mappings_allegra", &client, &queries).await;
     execute("manual_mappings_inderal", &client, &queries).await;
     execute("manual_mappings_tylenol", &client, &queries).await;

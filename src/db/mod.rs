@@ -1,4 +1,7 @@
 use std::collections::HashMap;
+use std::io;
+use std::io::Write;
+use std::time::Instant;
 
 use deadpool::managed::Object;
 use deadpool_postgres::tokio_postgres::Error;
@@ -10,14 +13,19 @@ pub async fn execute(
     client: &Object<ClientWrapper, Error>,
     queries: &HashMap<String, String>,
 ) {
+    let start = Instant::now();
+
+    print!("Executing the {} query... ", query_name);
+    io::stdout().flush();
+
     let result = client
         .execute(queries.get(query_name).unwrap().as_str(), &[])
         .await
         .expect(&msg(query_name));
-    println!(
-        "Executed the {} query, {} rows affected",
-        query_name, result
-    );
+
+    let seconds = start.elapsed().as_secs_f32();
+
+    println!("{} rows affected in {:.2}s", result, seconds);
 }
 
 pub async fn execute_param(
@@ -41,7 +49,7 @@ pub fn init_db_pool() -> Pool {
     let mut pg_config = tokio_postgres::Config::new();
     pg_config.port(5432);
     pg_config.host("localhost");
-    pg_config.user("postgres");
+    pg_config.user("rowan");
     pg_config.dbname("cem");
     let mgr_config = ManagerConfig {
         recycling_method: RecyclingMethod::Fast,

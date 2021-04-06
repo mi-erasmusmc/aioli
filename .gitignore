@@ -1,5 +1,6 @@
 /sql/create_faers.sql
 /src/fda_data_pull
+/sql/exact_mapping/katy_normalizer.sql
 
 
 /target

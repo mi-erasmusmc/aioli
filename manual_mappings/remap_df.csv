@@ -1,0 +1,14 @@
+old,new
+oral,oral tablet
+intramuscular,prefilled syringe
+injection,prefilled syringe
+inhalation,inhalation powder
+intravenous,prefilled syringe
+tablet,oral tablet
+caplet,oral capsule
+topical,topical solution
+capsule,oral capsule
+oral capsule,oral tablet
+inhalation powder,dry powder inhaler
+metered dose inhaler,inhalation powder
+intrathecal,prefilled syringe
