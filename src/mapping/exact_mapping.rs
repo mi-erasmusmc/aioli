@@ -461,6 +461,8 @@ async fn to_atc(pool: &Pool) -> Result<(), Box<dyn Error>> {
     execute("infer_from_patch", &client, &queries).await;
     execute("infer_from_patch_single_in", &client, &queries).await;
     execute("from_rxnconso", &client, &queries).await;
+    execute("drop_atc_case_drug_current", &client, &queries).await;
+    execute("drop_atc_case_drug_legacy", &client, &queries).await;
     execute("create_atc_case_drug_current", &client, &queries).await;
     execute("create_atc_case_drug_legacy", &client, &queries).await;
 

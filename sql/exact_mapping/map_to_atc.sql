@@ -93,6 +93,13 @@ FROM cte
 WHERE s.rxcui = cte.rxcui
   AND s.atc_code IS NULL;
 
+-- name: drop_atc_case_drug_current
+DROP TABLE IF EXISTS faers.atc_case_drug_c;
+
+-- name: drop_atc_case_drug_legacy
+DROP TABLE IF EXISTS faers.atc_case_drug_l;
+
+
 -- name: create_atc_case_drug_current
 CREATE TABLE faers.atc_case_drug_c AS (SELECT a.primaryid,
                                               drug_seq,
