@@ -87,4 +87,4 @@ FROM (
          GROUP BY upper(drugname), lower(route), cast(nda_num AS TEXT), lower(drugname)) AS unified
 GROUP BY drugname, prod_ai, route, dose_amt, dose_form, dose_unit, nda_num, drugname_clean, prod_ai_clean, route_clean,
          dose_form_clean, temp_dose_form, dose_amt_clean, dose_unit_clean, rx_ingredient, rx_dose_form, rx_brand_name,
-         rxcui, str, tty;
+         rxcui, str, tty, atc_code, atc_method, atc_str;

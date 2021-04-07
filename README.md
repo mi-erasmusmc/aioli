@@ -32,7 +32,7 @@ comments and suggestions are very much welcome.
       TODO: automate this step)
     - Include ATC codes in your OMOP vocabulary.
     - Obtain the mapping from RxNorm to ATC being developed at the ErasmusMC Medical Informatics department, get in
-      touch with the author of this app for more details.
+      touch with r.parry at erasmusmc dot nl for more details.
 
 ### HOW TO RUN
 
@@ -43,14 +43,14 @@ comments and suggestions are very much welcome.
 
 ### OPTIONS
 
-There are three settings that you can configure in the Settings.toml file.
+There are three settings that you can configure in the `Settings.toml` file.
 
 1. *skip_normalizer* You can skip calling the RxNormalizer, the RxNormalizer is an API that allows to find RxNorm ids
    based on a string and accounts for common typos and alternative spellings, pulling all 600.000 unique strings in the
    FAERS data through this api takes over a day (currently we do only the 60.000 most common strings, to save some
    time (can change the limit in the rxnormalizer.sql file)) (rxnav throttle the amount of request to 20 per second,
    there is a docker image you could download and call as fast your computer can handle in stead, but loading that image
-   also take a while). Skipping the api calls will still give you a pretty decent amount of matches.
+   also take a while). Skipping the api calls will still give you a very decent amount of matches.
 
 2. *retain_multi* In the original mapping section of AEOLUS the idea was to include multi-ingredient drugs in the roll
    up, the present implementation splits the multi-ingredient drugs to single ingredient entries (you can still find the
