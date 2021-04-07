@@ -56,7 +56,8 @@ There are three settings that you can configure in the `Settings.toml` file.
    up, the present implementation splits the multi-ingredient drugs to single ingredient entries (you can still find the
    multi-ingredient entries in the mapping before they are converted to 'standardized' ids).
 
-3. *use_atc* Set this option to true to normalize the drugs to ATC codes. This feature is still **experimental**
+3. *use_atc* Set this option to true to normalize the drugs to ATC codes. This feature is still **experimental** when
+   using this mode it runs multiple processes async and logging gets a bit jumbled up sometimes :-)
 
 #### TODO:
 

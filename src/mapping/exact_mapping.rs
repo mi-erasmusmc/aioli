@@ -7,6 +7,7 @@ use csv::Reader;
 use deadpool::managed::Object;
 use deadpool_postgres::tokio_postgres::Row;
 use deadpool_postgres::{ClientWrapper, Pool};
+use rand::Rng;
 use rawsql::Loader;
 
 use crate::db::execute;
@@ -124,7 +125,7 @@ pub async fn clean_dose_form(pool: &Pool) -> Result<(), Box<dyn Error>> {
         );
         let q2 = format!("update faers.drug_mapping_exact set {t} = regexp_replace({t}, ' +$', '', 'gi') where {t} like '% '", t = target);
         let q3 = format!("update faers.drug_mapping_exact set {t} = regexp_replace({t}, '^ +', '', 'gi') where {t} like ' %'", t = target);
-        let q4 = format!("update faers.drug_mapping_exact set {t} = regexp_replace({t}, '(\\S) +', '\\1 ', 'gi') where {t} ' %'", t = target);
+        let q4 = format!("update faers.drug_mapping_exact set {t} = regexp_replace({t}, '(\\S) +', '\\1 ', 'gi') where {t} like ' %'", t = target);
         let q5 = format!(
             "update faers.drug_mapping_exact set {t} = null where {t} = ''",
             t = target
@@ -273,13 +274,17 @@ async fn remove_unknown_dose_form_terms(
             let count = match result {
                 Ok(rows) => rows,
                 Err(e) => {
+                    let mut rng = rand::thread_rng();
+                    let secs = rng.gen_range(3..7);
                     println!(
-                        "Caught an error of kind {}, going to wait 3 seconds and try again",
-                        e.to_string()
+                        "Caught an error of kind {}, going to wait {} seconds and try again",
+                        e.to_string(),
+                        secs
                     );
-                    let time = time::Duration::from_secs(3);
+                    let time = time::Duration::from_secs(secs);
                     thread::sleep(time);
-                    client.execute(query.as_str(), &[]).await.unwrap()
+                    // This might fail again
+                    client.execute(query.as_str(), &[]).await.unwrap_or(0)
                 }
             };
             println!("Removed the word {} from {} rows", faers_df, count);

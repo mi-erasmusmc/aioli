@@ -12,9 +12,8 @@ mod rx_to_standard;
 mod rxnormalizer;
 mod table_creator;
 
-pub async fn map_atc(pool: &Pool) -> Result<(), Box<dyn Error>> {
-    exact_mapping::map(pool).await?;
-    Ok(())
+pub async fn map_atc(pool: &Pool) {
+    exact_mapping::map(pool).await.unwrap();
 }
 
 pub async fn create_mapping_table(pool: &Pool) -> Result<(), Box<dyn Error>> {

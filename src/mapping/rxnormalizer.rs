@@ -1,6 +1,6 @@
-use std::{thread, time};
 use std::error::Error;
 use std::time::Instant;
+use std::{thread, time};
 
 use deadpool::managed::Object;
 use deadpool_postgres::{ClientWrapper, Pool};
@@ -112,7 +112,7 @@ pub async fn normalize_exact(pool: &Pool) -> Result<(), Box<dyn Error>> {
         split_rows_call_parallel(db_client_5, db_client_6, rows_3),
         split_rows_call_parallel(db_client_7, db_client_8, rows_4),
     )
-        .await;
+    .await;
 
     Ok(())
 }

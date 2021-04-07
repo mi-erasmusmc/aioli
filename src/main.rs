@@ -2,7 +2,6 @@ use std::error::Error;
 use std::time::Instant;
 
 use deadpool_postgres::Pool;
-use futures::future::join;
 
 use crate::mapping::{
     create_final_tables, create_mapping_table, initial_basic_mapping, map_rx_to_cdm_concept_id,
@@ -37,16 +36,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let map_atc = settings.get_bool("map_atc").unwrap();
     if map_atc {
         let pool_2 = db::init_db_pool(&settings);
-        let result = join(
+        tokio::join!(
             mapping::map_atc(&pool_1),
-            map_rxnorm(skip_normalizer, split_multi, &pool_2),
-        )
-        .await;
-        // To be sure that no errors were propagated and never unwrapped
-        result.0.unwrap();
-        result.1.unwrap();
+            map_rxnorm(skip_normalizer, split_multi, &pool_2)
+        );
     } else {
-        map_rxnorm(skip_normalizer, split_multi, &pool_1).await?;
+        map_rxnorm(skip_normalizer, split_multi, &pool_1).await;
     }
 
     create_final_tables(&pool_1, map_atc).await;
@@ -65,19 +60,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-async fn map_rxnorm(
-    skip_normalizer: bool,
-    split_multi: bool,
-    pool: &Pool,
-) -> Result<(), Box<dyn Error>> {
-    create_mapping_table(&pool).await?;
-    initial_basic_mapping(&pool).await?;
+async fn map_rxnorm(skip_normalizer: bool, split_multi: bool, pool: &Pool) {
+    create_mapping_table(&pool).await.unwrap();
+    initial_basic_mapping(&pool).await.unwrap();
 
     if !skip_normalizer {
-        rxnormalize(&pool).await?;
+        rxnormalize(&pool).await.unwrap();
     }
     map_rx_to_cdm_concept_id(&pool).await;
     run_original_aeolus(&pool).await;
     roll_up(&pool, split_multi).await;
-    Ok(())
 }
