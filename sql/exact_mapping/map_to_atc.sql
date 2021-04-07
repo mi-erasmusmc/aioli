@@ -1,3 +1,13 @@
+-- name: populate_str
+UPDATE faers.drug_mapping_exact m
+SET str = r.str
+FROM faers.rxnconso r
+WHERE cast(r.rxcui AS TEXT) = m.rxcui
+  AND r.tty NOT IN ('TMSY', 'SY')
+  AND r.sab = 'RXNORM'
+  AND m.str IS NULL;
+
+
 -- name: set_atc_string_1
 UPDATE faers.drug_mapping_exact dme
 SET atc_str = lower(replace(str,
@@ -100,7 +110,7 @@ CREATE TABLE faers.atc_case_drug_c AS (SELECT a.primaryid,
                                                coalesce(lower(a.dose_unit), 'a') = coalesce(drm.dose_unit, 'a') AND
                                                coalesce(lower(a.nda_num), 'a') = coalesce(drm.nda_num, 'a')
                                        WHERE drm.atc_code IS NOT NULL
-                                       GROUP BY a.primaryid, drug_seq, role_cod, drm.atc_str, drm.rxcui_final,
+                                       GROUP BY a.primaryid, drug_seq, role_cod, drm.atc_str,
                                                 drm.atc_code,
                                                 drm.atc_method);
 

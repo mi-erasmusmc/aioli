@@ -55,7 +55,7 @@ FROM faers.standard_combined_drug_mapping a
 
 -- name: create_standard_case_drug_atc
 CREATE TABLE faers.standard_case_drug AS
-SELECT DISTINCT a.primaryid, a.isr, a.drug_seq, a.role_cod, a.atc_concept_id AS standard_concept_id
+SELECT DISTINCT a.primaryid, a.isr, a.drug_seq, a.role_cod, a.atc_code AS standard_concept_id
 FROM faers.standard_combined_drug_mapping a;
 
 -- name: expand_table_atc

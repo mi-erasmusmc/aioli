@@ -453,6 +453,7 @@ async fn to_atc(pool: &Pool) -> Result<(), Box<dyn Error>> {
         .queries;
 
     println!("Final mapping to ATC");
+    execute("populate_str", &client, &queries).await;
     execute("set_atc_string_1", &client, &queries).await;
     execute("set_atc_string_2", &client, &queries).await;
     execute("set_rxcui_for_ing", &client, &queries).await;

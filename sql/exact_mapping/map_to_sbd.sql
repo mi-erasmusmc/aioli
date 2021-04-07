@@ -13,6 +13,7 @@ WITH cte1 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                 AND m.dose_amt_clean IS NOT NULL
                 AND m.dose_unit_clean IS NOT NULL
                 AND m.rx_dose_form IS NOT NULL
+                AND m.rxcui IS NULL
                 AND r.tty = 'SBD'
                 AND r.sab = 'RXNORM'
                 AND r.suppress != 'O'
