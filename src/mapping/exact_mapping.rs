@@ -284,7 +284,7 @@ async fn remove_unknown_dose_form_terms(
                     let time = time::Duration::from_secs(secs);
                     thread::sleep(time);
                     // This might fail again
-                    client.execute(query.as_str(), &[]).await.unwrap_or(0)
+                    client.execute(query.as_str(), &[]).await.unwrap()
                 }
             };
             println!("Removed the word {} from {} rows", faers_df, count);
