@@ -1,11 +1,12 @@
+use std::{thread, time};
 use std::error::Error;
 use std::time::Instant;
-use std::{thread, time};
 
 use deadpool::managed::Object;
 use deadpool_postgres::{ClientWrapper, Pool};
 use futures::future::join4;
 use rawsql::Loader;
+use reqwest::{Client, Response};
 use tokio_postgres::Row;
 
 const RXNAV_URL: &str = "https://rxnav.nlm.nih.gov/REST/rxcui.json";
@@ -55,12 +56,7 @@ async fn call_rxnorm(db_client: Object<ClientWrapper, tokio_postgres::Error>, ro
         // braces and brackets cause rxnav to crash so duping them...
         let drug = drug_name_clean.replace(&['{', '}', '[', ']'][..], "");
 
-        let res = web_client
-            .get(RXNAV_URL)
-            .query(&[("name", &drug), ("search", &String::from("1"))])
-            .send()
-            .await
-            .unwrap();
+        let res = make_call(&web_client, &drug).await;
         let status = res.status();
         let body = res.text().await.unwrap();
         if status.is_success() {
@@ -116,7 +112,7 @@ pub async fn normalize_exact(pool: &Pool) -> Result<(), Box<dyn Error>> {
         split_rows_call_parallel(db_client_5, db_client_6, rows_3),
         split_rows_call_parallel(db_client_7, db_client_8, rows_4),
     )
-    .await;
+        .await;
 
     Ok(())
 }
@@ -171,28 +167,7 @@ async fn call_rxnorm_exact(db_client: Object<ClientWrapper, tokio_postgres::Erro
         // braces and brackets cause rxnav to crash so duping them...
         let drug = drug_name_clean.replace(&['{', '}', '[', ']'][..], "");
 
-        let result = web_client
-            .get(RXNAV_URL)
-            .query(&[("name", &drug), ("search", &String::from("1"))])
-            .send()
-            .await;
-        let res = match result {
-            Ok(res) => res,
-            Err(e) => {
-                println!(
-                    "Caught an error of kind {}, going to wait some seconds and try again",
-                    e.to_string()
-                );
-                let sleepy_time = time::Duration::from_secs(5);
-                thread::sleep(sleepy_time);
-                web_client
-                    .get(RXNAV_URL)
-                    .query(&[("name", &drug), ("search", &String::from("1"))])
-                    .send()
-                    .await
-                    .unwrap()
-            }
-        };
+        let res = make_call(&web_client, &drug).await;
         let status = res.status();
         let body = res.text().await.unwrap();
         if status.is_success() {
@@ -269,6 +244,32 @@ async fn call_rxnorm_exact(db_client: Object<ClientWrapper, tokio_postgres::Erro
             println!("RxNav returned error status: {}", status)
         }
     }
+}
+
+async fn make_call(web_client: &Client, drug: &String) -> Response {
+    let result = web_client
+        .get(RXNAV_URL)
+        .query(&[("name", &drug), ("search", &&String::from("1"))])
+        .send()
+        .await;
+    let res = match result {
+        Ok(res) => res,
+        Err(e) => {
+            println!(
+                "Caught an error of kind {}, going to wait 5 seconds and try again",
+                e.to_string()
+            );
+            let sleepy_time = time::Duration::from_secs(5);
+            thread::sleep(sleepy_time);
+            web_client
+                .get(RXNAV_URL)
+                .query(&[("name", &drug), ("search", &&String::from("1"))])
+                .send()
+                .await
+                .unwrap()
+        }
+    };
+    res
 }
 
 fn print_time_remaining(total: usize, start: Instant, pos: usize) {
