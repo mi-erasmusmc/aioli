@@ -1,5 +1,5 @@
 -- name: find_match_on_rxconso
-WITH cte AS (SELECT a.drug_name_clean, string_agg(DISTINCT CAST(rx.rxcui AS varchar), ',') AS rxcui
+WITH cte AS (SELECT a.drug_name_clean, string_agg(DISTINCT cast(rx.rxcui AS VARCHAR), ',') AS rxcui
              FROM faers.drug_mapping a
                       JOIN faers.rxnconso rx
                            ON lower(rx.str) = lower(a.drug_name_clean)

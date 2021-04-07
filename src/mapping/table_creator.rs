@@ -1,8 +1,10 @@
-use crate::db::execute;
+use std::error::Error;
+
 use deadpool::managed::Object;
 use deadpool_postgres::{ClientWrapper, Pool};
 use rawsql::Loader;
-use std::error::Error;
+
+use crate::db::execute;
 
 pub async fn create_mapping_table(pool: &Pool) -> Result<(), Box<dyn Error>> {
     println!("Creating the drug mapping table... takes a minute ... ");

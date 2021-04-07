@@ -1,24 +1,24 @@
 -- name: drop_ai
-drop table if exists faers.drug_ai_mapping;
+DROP TABLE IF EXISTS faers.drug_ai_mapping;
 -- name: create_ai
-create table faers.drug_ai_mapping as
-select distinct drugname              as drug_name_original,
-                lower(prod_ai)        as prod_ai,
-                cast(null as integer) as concept_id,
-                null                  as update_method,
-                null                  as rxcui
-from faers.drug a
-         inner join faers.unique_all_case b on a.primaryid = b.primaryid
-where b.isr is null
-  and prod_ai is not null;
+CREATE TABLE faers.drug_ai_mapping AS
+SELECT DISTINCT drugname              AS drug_name_original,
+                lower(prod_ai)        AS prod_ai,
+                cast(NULL AS INTEGER) AS concept_id,
+                NULL                  AS update_method,
+                NULL                  AS rxcui
+FROM faers.drug a
+         INNER JOIN faers.unique_all_case b ON a.primaryid = b.primaryid
+WHERE b.isr IS NULL
+  AND prod_ai IS NOT NULL;
 
 -- name: drop_index
-drop index if exists faers.prod_ai_ix;
+DROP INDEX IF EXISTS faers.prod_ai_ix;
 -- name: create_index
-create index prod_ai_ix on faers.drug_ai_mapping (prod_ai);
+CREATE INDEX prod_ai_ix ON faers.drug_ai_mapping (prod_ai);
 
 -- name: update_ai
-WITH cte AS (SELECT a.drug_name_original, string_agg(DISTINCT CAST(rx.rxcui AS varchar), ',') AS rxcui
+WITH cte AS (SELECT a.drug_name_original, string_agg(DISTINCT cast(rx.rxcui AS VARCHAR), ',') AS rxcui
              FROM faers.drug_ai_mapping a
                       JOIN faers.rxnconso rx
                            ON lower(rx.str) = lower(a.prod_ai)
@@ -30,7 +30,7 @@ FROM cte
 WHERE cte.drug_name_original = a.drug_name_original;
 
 -- name: update_concept_ids
-UPDATE faers.drug_ai_mapping as drm
+UPDATE faers.drug_ai_mapping AS drm
 SET concept_id = c.concept_id
 FROM staging_vocabulary.concept c
 WHERE drm.rxcui = c.concept_code

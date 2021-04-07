@@ -1,10 +1,11 @@
+use std::env;
+use std::error::Error;
+
 use deadpool_postgres::Pool;
 use rawsql::Loader;
 
 use crate::db::{execute, execute_param};
 use crate::mapping::{map_rx_to_cdm_concept_id, rxnormalizer};
-use std::env;
-use std::error::Error;
 
 pub async fn basic_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
     {
@@ -19,7 +20,7 @@ pub async fn basic_mapping(pool: &Pool) -> Result<(), Box<dyn Error>> {
             &queries,
             "Initial mapping",
         )
-            .await;
+        .await;
     }
     let mut result: u64 = 1;
     while result != 0 {
@@ -64,7 +65,7 @@ async fn clean_and_match(pool: &Pool) -> u64 {
         &queries,
         "Initial mapping",
     )
-        .await
+    .await
 }
 
 async fn remove_keywords(pool: &Pool) -> u64 {
@@ -123,7 +124,7 @@ async fn eu_drug_name(pool: &Pool) {
         &queries,
         "eu drug parentheses",
     )
-        .await;
+    .await;
 
     map_rx_to_cdm_concept_id(&pool).await;
 }
@@ -149,13 +150,13 @@ async fn ingredient_matching(pool: &Pool) {
         &client,
         &queries,
     )
-        .await;
+    .await;
     execute(
         "12_map_drugs_with_single_ingredient_to_ingredient_concepts",
         &client,
         &queries,
     )
-        .await;
+    .await;
     execute("13_drop_brands_table", &client, &queries).await;
     execute("14_create_brands_table", &client, &queries).await;
     execute("15_drop_source_brand_mapping_table", &client, &queries).await;

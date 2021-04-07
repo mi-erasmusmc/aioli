@@ -1,0 +1,11 @@
+# Database settings
+pg_port = 5432
+pg_host = "localhost"
+pg_user = "rowan"
+pg_password = "postgres"
+pg_dbname = "cem"
+
+# Run settings
+skip_normalizer = false    # Whether or not to call the RxNormalizer API
+retain_multi = false       # Retain multi-ingredient drugs or split them to single ingredients
+map_atc = true             # Map to ATC rather than RxNorm (results have not yet been properly validated)
