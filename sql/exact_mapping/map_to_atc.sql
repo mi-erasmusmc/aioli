@@ -67,7 +67,7 @@ WITH cte1 AS (SELECT DISTINCT atc_str AS str_final
      cte2 AS (SELECT string_agg(DISTINCT p.atc, ',') AS atc, dme.str_final
               FROM faers.rxnorm_atc_patch p
                        JOIN cte1 dme ON lower(p.name) LIKE concat(str_final, '%')
-              WHERE "Ingredients" = 1
+              WHERE "ingredients" = 1
               GROUP BY dme.str_final
               HAVING count(DISTINCT p.atc) = 1)
 UPDATE faers.drug_mapping_exact dme
@@ -78,15 +78,15 @@ WHERE cte2.str_final = dme.atc_str
   AND dme.atc_code IS NULL;
 
 -- name: from_rxnconso
-WITH cte AS (SELECT rx.rxcui, string_agg(DISTINCT rx.code, ',') AS atc
-             FROM faers.standard_combined_drug_mapping e
-                      JOIN faers.rxnconso rx ON e.rxcui = rx.rxcui
+WITH cte AS (SELECT cast(rx.rxcui AS text) AS rxcui, string_agg(DISTINCT rx.code, ',') AS atc
+             FROM faers.drug_mapping_exact e
+                      JOIN faers.rxnconso rx ON e.rxcui = cast(rx.rxcui AS text)
              WHERE rx.sab = 'ATC'
                AND length(rx.code) = 7
                AND e.atc_code IS NULL
-             GROUP BY rx.rxcui
+             GROUP BY cast(rx.rxcui AS text)
              HAVING count(DISTINCT rx.code) = 1)
-UPDATE faers.standard_combined_drug_mapping s
+UPDATE faers.drug_mapping_exact s
 SET atc_code   = cte.atc,
     atc_method = 'rxnconso'
 FROM cte
@@ -139,6 +139,6 @@ CREATE TABLE faers.atc_case_drug_l AS (SELECT a.isr,
                                          AND dose_amt IS NULL
                                          AND dose_form IS NULL
                                          AND dose_unit IS NULL
-                                       GROUP BY a.isr, drug_seq, role_cod, drm.atc_str, drm.rxcui_final,
+                                       GROUP BY a.isr, drug_seq, role_cod, drm.atc_str, drm.rxcui,
                                                 drm.atc_code,
                                                 drm.atc_method);

@@ -40,7 +40,7 @@ FROM (
                          drm.update_method                        AS update_method,
                          cast(drm.standard_concept_id AS INTEGER) AS standard_concept_id
          FROM faers.drug_legacy a
-                  INNER JOIN faers.unique_all_case b ON a.isr = cast(b.isr AS INTEGER)
+                  INNER JOIN faers.unique_all_case b ON a.isr = b.isr
                   JOIN faers.drug_mapping drm ON drm.drug_name_original = a.drugname
          WHERE b.isr IS NOT NULL) aa;
 
@@ -78,8 +78,8 @@ UPDATE faers.standard_combined_drug_mapping scdm
 SET atc_code   = atc.atc_code,
     atc_method = atc.atc_method
 FROM faers.atc_case_drug_l atc
-WHERE cast(scdm.isr AS INT) = atc.isr
-  AND cast(scdm.drug_seq AS INT) = atc.drug_seq
+WHERE scdm.isr = atc.isr
+  AND scdm.drug_seq = atc.drug_seq
   AND scdm.role_cod = atc.role_cod;
 
 -- name: populate_atc_from_regular_mapping
@@ -107,7 +107,7 @@ WITH cte1 AS (SELECT DISTINCT lower(c.concept_name) AS concept_name, c.concept_i
      cte2 AS (SELECT string_agg(DISTINCT p.atc, ',') AS atc, cte1.concept_id
               FROM faers.rxnorm_atc_patch p
                        JOIN cte1 ON lower(p.name) LIKE concat(cte1.concept_name, '%')
-              WHERE "Ingredients" = 1
+              WHERE "ingredients" = 1
               GROUP BY cte1.concept_id
               HAVING count(DISTINCT p.atc) = 1)
 UPDATE faers.standard_combined_drug_mapping scdm
