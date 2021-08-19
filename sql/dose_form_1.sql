@@ -22,7 +22,7 @@ WHERE temp_dose_form IS NOT NULL;
 WITH cte AS (SELECT lower(array_to_string(array(SELECT DISTINCT unnest(string_to_array(rx.str, ' ')) AS w ORDER BY w),
                                           ' ')) AS orderd,
                     rx.str
-             FROM faers.rxnconso rx
+             FROM rxnorm.rxnconso rx
              WHERE rx.tty = 'DF'
                AND rx.sab = 'RXNORM'
              GROUP BY lower(array_to_string(array(SELECT DISTINCT unnest(string_to_array(rx.str, ' ')) AS w ORDER BY w),

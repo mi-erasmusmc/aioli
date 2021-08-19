@@ -1,6 +1,6 @@
 -- name: exact
 WITH cte2 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui, m.id
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    faers.drug_mapping_exact_java m
                    ON lower(r.str) =
@@ -29,8 +29,8 @@ WHERE cte2.id = m.id;
 -- name: drug_clean
 WITH cte1 AS (SELECT DISTINCT drugname_clean, string_agg(DISTINCT cast(r2.rxcui AS TEXT), ',') AS cui
               FROM faers.drug_mapping_exact_java m
-                       JOIN faers.rxnconso r ON m.drugname_clean = lower(r.str)
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON m.drugname_clean = lower(r.str)
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE r2.tty = 'SBD'
                 AND r2.sab = 'RXNORM'
                 AND r2.suppress != 'O'
@@ -56,7 +56,7 @@ WITH cte1 AS (SELECT DISTINCT rx_brand_name AS rxbn, rx_ingredient AS ing
      cte2 AS (SELECT DISTINCT string_agg(DISTINCT cast(r.rxcui AS VARCHAR), ',') AS rxcui,
                               cte1.rxbn,
                               cte1.ing
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN cte1 ON lower(r.str) LIKE concat(replace(cte1.ing, ' ', '%'), '%', '[', cte1.rxbn, ']')
               WHERE r.sab = 'RXNORM'
                 AND r.tty = 'SBD'
@@ -84,7 +84,7 @@ WITH cte1 AS (SELECT DISTINCT rx_brand_name AS rxbn, rx_ingredient AS ing, rx_do
                      cte1.rxbn,
                      cte1.ing,
                      cte1.rdf
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN cte1 ON lower(r.str) LIKE
                                     lower(concat(replace(cte1.ing, ' ', '%'), '%', cte1.rdf, '%[', cte1.rxbn, ']'))
               WHERE r.sab = 'RXNORM'
@@ -109,7 +109,7 @@ WITH cte1 AS (SELECT DISTINCT rx_brand_name AS rxbn
                 AND rxcui IS NULL),
      cte2 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                      cte1.rxbn
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    cte1
                    ON lower(r.str) LIKE
@@ -137,7 +137,7 @@ WITH cte1 AS (SELECT DISTINCT rx_brand_name AS rxbn, rx_ingredient AS ing
      cte2 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                      cte1.ing,
                      cte1.rxbn
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    cte1
                    ON lower(r.str) LIKE lower(concat(cte1.ing, ' %[', cte1.rxbn, ']'))
@@ -165,7 +165,7 @@ WITH cte1 AS (SELECT DISTINCT rx_brand_name AS rxbn, rx_dose_form AS rdf
      cte2 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                      cte1.rxbn,
                      cte1.rdf
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    cte1
                    ON lower(r.str) LIKE
@@ -194,7 +194,7 @@ WITH cte1 AS (SELECT DISTINCT rx_brand_name AS rxbn, rx_dose_form AS rdf
      cte2 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                      cte1.rxbn,
                      cte1.rdf
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    cte1
                    ON lower(r.str) LIKE
@@ -230,7 +230,7 @@ WITH cte1 AS (SELECT rx_ingredient AS ing,
                      cte1.rxbn,
                      cte1.rdf,
                      string_agg(DISTINCT r.str, ',')
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    cte1
                    ON lower(r.str) LIKE
@@ -269,7 +269,7 @@ WITH cte1 AS (SELECT rx_ingredient  AS ing,
                      cte1.rdf,
                      cte1.ing,
                      cte1.dac
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    cte1
                    ON lower(r.str) LIKE

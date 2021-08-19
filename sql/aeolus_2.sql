@@ -46,7 +46,7 @@ FROM (
          WHERE word NOT IN ('')
            AND word NOT IN (SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                                          E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+'))
-                            FROM faers.rxnconso b
+                            FROM rxnorm.rxnconso b
                             WHERE b.sab = 'RXNORM'
                               AND b.tty = 'DF'
                             ORDER BY 1)
@@ -54,7 +54,7 @@ FROM (
                         FROM (
                                  SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                                               E'[\ \,\(\)\{\}\\\\/\^\%\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+')) AS word
-                                 FROM faers.rxnconso b
+                                 FROM rxnorm.rxnconso b
                                  WHERE b.sab = 'RXNORM'
                                    AND b.tty = 'IN'
                              ) aa
@@ -110,7 +110,7 @@ FROM (
                                                         E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+') AS word_list
                            FROM (
                                     SELECT lower(str) AS concept_name, rxcui AS concept_id
-                                    FROM faers.rxnconso b
+                                    FROM rxnorm.rxnconso b
                                     WHERE b.sab = 'RXNORM'
                                       AND b.tty = 'BN'
                                 ) aa
@@ -120,7 +120,7 @@ FROM (
          WHERE word NOT IN ('')
            AND word NOT IN (SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                                          E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+'))
-                            FROM faers.rxnconso b
+                            FROM rxnorm.rxnconso b
                             WHERE b.sab = 'RXNORM'
                               AND b.tty = 'DF'
                             ORDER BY 1)
@@ -178,7 +178,7 @@ FROM (
          WHERE word NOT IN ('')
            AND word NOT IN (SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                                          E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+'))
-                            FROM faers.rxnconso b
+                            FROM rxnorm.rxnconso b
                             WHERE b.sab = 'RXNORM'
                               AND b.tty = 'DF'
                             ORDER BY 1)
@@ -186,7 +186,7 @@ FROM (
                         FROM (
                                  SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                                               E'[\ \,\(\)\{\}\\\\/\^\%\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+')) AS word
-                                 FROM faers.rxnconso b
+                                 FROM rxnorm.rxnconso b
                                  WHERE b.sab = 'RXNORM'
                                    AND b.tty = 'BN'
                              ) aa

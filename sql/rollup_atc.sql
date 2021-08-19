@@ -14,7 +14,7 @@ CREATE INDEX drug_mapping_exact_java_rxcui_index
 -- name: populate_str
 UPDATE faers.drug_mapping_exact_java m
 SET str = lower(r.str)
-FROM faers.rxnconso r
+FROM rxnorm.rxnconso r
 WHERE r.rxcui = m.rxcui
   AND r.tty NOT IN ('TMSY', 'SY')
   AND r.sab = 'RXNORM'
@@ -38,7 +38,7 @@ WHERE atc_str IS NULL
 -- name: set_rxcui_for_ing
 UPDATE faers.drug_mapping_exact_java dme
 SET rxcui = rx.rxcui
-FROM faers.rxnconso rx
+FROM rxnorm.rxnconso rx
 WHERE lower(dme.rx_ingredient) = lower(rx.str)
   AND atc_str IS NULL
   AND dme.rxcui IS NULL
@@ -98,7 +98,7 @@ WHERE cte2.str_final = dme.atc_str
 -- name: from_rxnconso
 WITH cte AS (SELECT rx.rxcui AS rxcui, string_agg(DISTINCT rx.code, ',') AS atc
              FROM faers.drug_mapping_exact_java e
-                      JOIN faers.rxnconso rx ON e.rxcui = rx.rxcui
+                      JOIN rxnorm.rxnconso rx ON e.rxcui = rx.rxcui
              WHERE rx.sab = 'ATC'
                AND length(rx.code) = 7
                AND e.atc_code IS NULL

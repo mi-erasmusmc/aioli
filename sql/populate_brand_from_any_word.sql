@@ -8,8 +8,8 @@ WITH cte1 AS (SELECT DISTINCT drugname_clean
      cte2 AS (
          SELECT cte1.drugname_clean, string_agg(DISTINCT lower(r2.str), ',') AS brand_name
          FROM cte1
-                  JOIN rxnconso r ON lower(r.str) = ANY (string_to_array(drugname_clean, ' '))
-                  JOIN rxnconso r2 ON r.rxcui = r2.rxcui
+                  JOIN rxnorm.rxnconso r ON lower(r.str) = ANY (string_to_array(drugname_clean, ' '))
+                  JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
          WHERE r2.tty = 'BN'
            AND r2.sab = 'RXNORM'
            AND array_length(string_to_array(r2.str, ' '), 1) = 1

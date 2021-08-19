@@ -9,13 +9,13 @@ ALTER TABLE drug_mapping_exact_java
 WITH cte1 AS (SELECT DISTINCT rxcui FROM drug_mapping_exact_java WHERE rx_ingredient IS NULL),
      cte2 AS (SELECT DISTINCT cte1.rxcui, lower(string_agg(DISTINCT r_in.str, ' / ' ORDER BY r_in.str)) AS ingr
               FROM cte1
-                       JOIN rxnrel rel ON rel.rxcui1 = cte1.rxcui
-                       JOIN rxnconso r_in ON rel.rxcui2 = r_in.rxcui
+                       JOIN rxnorm.rxnrel rel ON rel.rxcui1 = cte1.rxcui
+                       JOIN rxnorm.rxnconso r_in ON rel.rxcui2 = r_in.rxcui
                   AND r_in.tty IN ('IN', 'MIN')
                   AND r_in.sab = 'RXNORM'
               GROUP BY cte1.rxcui),
      cte3 AS (SELECT DISTINCT cte2.rxcui AS rxcui, r.str AS ingredient
-              FROM rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN cte2 ON lower(r.str) = cte2.ingr AND r.tty IN ('IN', 'MIN')
                   AND r.sab = 'RXNORM')
 UPDATE drug_mapping_exact_java dme
@@ -43,7 +43,7 @@ SET final_id = cs.concept_id,
 FROM (SELECT max(c.concept_id) AS concept_id, rr.str
       FROM staging_vocabulary.concept c
                JOIN
-           faers.rxnconso rr ON
+           rxnorm.rxnconso rr ON
                        lower(c.concept_name) LIKE concat(rr.str, '%')
                    AND lower(c.concept_name) NOT LIKE concat(rr.str, ' / %')
                    AND rr.tty = 'MIN'

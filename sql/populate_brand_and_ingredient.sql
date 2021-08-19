@@ -1,8 +1,8 @@
 -- name: populate_brand_from_drug
 WITH cte1 AS (SELECT DISTINCT drugname_clean, lower(r2.str) AS brand_name
               FROM faers.drug_mapping_exact_java m
-                       JOIN faers.rxnconso r ON m.drugname_clean = lower(r.str)
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON m.drugname_clean = lower(r.str)
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE r2.tty = 'BN'
                 AND r2.sab = 'RXNORM'
                 AND m.rxcui IS NULL
@@ -16,8 +16,8 @@ WHERE cte1.drugname_clean = m.drugname_clean
 -- name: populate_ingredient_from_prod_ai
 WITH cte1 AS (SELECT DISTINCT prod_ai_clean, lower(r2.str) AS ingredient
               FROM faers.drug_mapping_exact_java m
-                       JOIN faers.rxnconso r ON m.prod_ai_clean = lower(r.str)
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON m.prod_ai_clean = lower(r.str)
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE r2.tty IN ('IN', 'PIN', 'MIN')
                 AND r2.sab = 'RXNORM'
                 AND m.rxcui IS NULL
@@ -32,8 +32,8 @@ WHERE cte1.prod_ai_clean = m.prod_ai_clean
 -- name: populate_ingredient_from_drug
 WITH cte1 AS (SELECT DISTINCT drugname_clean, string_agg(DISTINCT lower(r2.str), ',') AS ingredient
               FROM faers.drug_mapping_exact_java m
-                       JOIN faers.rxnconso r ON m.drugname_clean = lower(r.str)
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON m.drugname_clean = lower(r.str)
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE r2.tty IN ('IN', 'PIN', 'MIN')
                 AND r2.sab = 'RXNORM'
                 AND m.rxcui IS NULL
@@ -49,8 +49,8 @@ WHERE cte1.drugname_clean = m.drugname_clean
 -- name: sbd
 WITH cte1 AS (SELECT DISTINCT drugname_clean, string_agg(DISTINCT cast(r2.rxcui AS TEXT), ',') AS cui
               FROM faers.drug_mapping_exact_java m
-                       JOIN faers.rxnconso r ON m.drugname_clean = lower(r.str)
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON m.drugname_clean = lower(r.str)
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE r2.tty = 'SBD'
                 AND r2.sab = 'RXNORM'
                 AND r2.suppress != 'O'
@@ -68,8 +68,8 @@ WHERE cte1.drugname_clean = m.drugname_clean
 -- name: scd
 WITH cte1 AS (SELECT DISTINCT drugname_clean, string_agg(DISTINCT cast(r2.rxcui AS TEXT), ',') AS cui
               FROM faers.drug_mapping_exact_java m
-                       JOIN faers.rxnconso r ON m.drugname_clean = lower(r.str)
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON m.drugname_clean = lower(r.str)
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE r2.tty = 'SCD'
                 AND r2.sab = 'RXNORM'
                 AND r2.suppress != 'O'
@@ -90,8 +90,8 @@ WITH cte1 AS (SELECT DISTINCT string_agg(DISTINCT lower(r2.str), ',') AS ingredi
                               m.nda_num
               FROM faers.drug_mapping_exact_java m
                        JOIN faers.nda nda ON nda.appl_no = m.nda_num
-                       JOIN faers.rxnconso r ON lower(r.str) = concat(lower(replace(nda.ingredient, ';', ' /')))
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON lower(r.str) = concat(lower(replace(nda.ingredient, ';', ' /')))
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE (m.drugname_clean LIKE lower(concat('%', nda.ingredient, '%'))
                   OR m.prod_ai_clean LIKE lower(concat('%', nda.ingredient, '%'))
                   OR m.drugname_clean LIKE lower(concat('%', nda.trade_name, '%')))
@@ -116,8 +116,8 @@ WITH cte1 AS (SELECT DISTINCT string_agg(DISTINCT lower(r2.str), ',') AS ingredi
                               m.nda_num
               FROM faers.drug_mapping_exact_java m
                        JOIN faers.nda nda ON nda.appl_no = concat('0', m.nda_num)
-                       JOIN faers.rxnconso r ON lower(r.str) = concat(lower(replace(nda.ingredient, ';', ' /')))
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON lower(r.str) = concat(lower(replace(nda.ingredient, ';', ' /')))
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE (m.drugname_clean LIKE lower(concat('%', nda.ingredient, '%'))
                   OR m.prod_ai_clean LIKE lower(concat('%', nda.ingredient, '%'))
                   OR m.drugname_clean LIKE lower(concat('%', nda.trade_name, '%')))
@@ -139,7 +139,7 @@ WHERE cte1.drugname_clean = m.drugname_clean
 
 WITH cte AS (SELECT DISTINCT lower(art.name) AS dnc, lower(rx.str) AS ing
              FROM faers.article57_rxnorm art
-                      JOIN faers.rxnconso rx ON art.rxcui = cast(rx.rxcui as varchar)
+                      JOIN rxnorm.rxnconso rx ON art.rxcui = cast(rx.rxcui as varchar)
              WHERE art.rxcui NOT LIKE '%,%'
                AND rx.sab = 'RXNORM'
                AND rx.tty IN ('IN', 'MIN', 'PIN'))
@@ -151,7 +151,7 @@ WHERE cte.dnc = m.drugname_clean
 
 WITH cte AS (SELECT DISTINCT lower(art.name) AS dnc, lower(rx.str) AS ing
              FROM faers.article57_rxnorm art
-                      JOIN faers.rxnconso rx ON art.rxcui = cast(rx.rxcui as varchar)
+                      JOIN rxnorm.rxnconso rx ON art.rxcui = cast(rx.rxcui as varchar)
              WHERE art.rxcui NOT LIKE '%,%'
                AND rx.sab = 'RXNORM'
                AND rx.tty IN ('IN', 'MIN', 'PIN'))

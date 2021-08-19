@@ -1,7 +1,7 @@
 -- name: exact
 WITH cte1 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                      m.id
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    faers.drug_mapping_exact_java m
                    ON lower(r.str) =
@@ -30,7 +30,7 @@ WITH cte1 AS (SELECT DISTINCT rx_ingredient AS ing, rx_dose_form AS rxdf
      cte2 AS (SELECT string_agg(DISTINCT cast(r.rxcui AS TEXT), ',') AS rxcui,
                      cte1.ing,
                      cte1.rxdf
-              FROM faers.rxnconso r
+              FROM rxnorm.rxnconso r
                        JOIN
                    cte1
                    ON lower(r.str) LIKE
@@ -51,8 +51,8 @@ WHERE cte2.ing = m.rx_ingredient
 -- name: drug_clean
 WITH cte1 AS (SELECT drugname_clean, string_agg(DISTINCT cast(r2.rxcui AS TEXT), ',') AS cui
               FROM faers.drug_mapping_exact_java m
-                       JOIN faers.rxnconso r ON m.drugname_clean = lower(r.str)
-                       JOIN faers.rxnconso r2 ON r.rxcui = r2.rxcui
+                       JOIN rxnorm.rxnconso r ON m.drugname_clean = lower(r.str)
+                       JOIN rxnorm.rxnconso r2 ON r.rxcui = r2.rxcui
               WHERE r2.tty = 'SCDF'
                 AND r2.sab = 'RXNORM'
                 AND r2.suppress != 'O'

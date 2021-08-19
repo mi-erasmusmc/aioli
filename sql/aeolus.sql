@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS faers.drug_mapping_words;
 CREATE TABLE faers.drug_mapping_words AS
 WITH cte AS (SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                           E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+')) AS df
-             FROM cem.faers.rxnconso b
+             FROM rxnorm.rxnconso b
              WHERE b.sab = 'RXNORM'
                AND b.tty = 'DF'
              ORDER BY 1)
@@ -42,7 +42,7 @@ DROP TABLE IF EXISTS rxnorm_mapping_multi_ingredient_list;
 CREATE TABLE rxnorm_mapping_multi_ingredient_list AS
 WITH cte AS (SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                           E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+')) AS df
-             FROM cem.faers.rxnconso b
+             FROM rxnorm.rxnconso b
              WHERE b.sab = 'RXNORM'
                AND b.tty = 'DF'
              ORDER BY 1)
@@ -58,7 +58,7 @@ FROM (
                                                         E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+') AS word_list
                            FROM (
                                     SELECT lower(str) AS concept_name, rxcui AS concept_id
-                                    FROM cem.faers.rxnconso b
+                                    FROM rxnorm.rxnconso b
                                     WHERE b.sab = 'RXNORM'
                                       AND b.tty = 'MIN'
                                 ) aa
@@ -81,7 +81,7 @@ DROP TABLE IF EXISTS drug_mapping_multi_ingredient_list;
 CREATE TABLE drug_mapping_multi_ingredient_list AS
 WITH cte AS (SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                           E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+')) AS df
-             FROM cem.faers.rxnconso b
+             FROM rxnorm.rxnconso b
              WHERE b.sab = 'RXNORM'
                AND b.tty = 'DF'
              ORDER BY 1)
@@ -114,7 +114,7 @@ FROM (
                         FROM (
                                  SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                                               E'[\ \,\(\)\{\}\\\\/\^\%\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+')) AS word
-                                 FROM faers.rxnconso b
+                                 FROM rxnorm.rxnconso b
                                  WHERE b.sab = 'RXNORM'
                                    AND b.tty = 'MIN'
                              ) aa
@@ -165,7 +165,7 @@ FROM (
                                                         E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+') AS word_list
                            FROM (
                                     SELECT lower(str) AS concept_name, rxcui AS concept_id
-                                    FROM faers.rxnconso b
+                                    FROM rxnorm.rxnconso b
                                     WHERE b.sab = 'RXNORM'
                                       AND b.tty = 'IN'
                                 ) aa
@@ -175,7 +175,7 @@ FROM (
          WHERE word NOT IN ('')
            AND word NOT IN (SELECT DISTINCT unnest(regexp_split_to_array(lower(str),
                                                                          E'[\ \,\(\)\{\}\\\\/\^\%\.\~\`\@\#\$\;\:\"\'\?\<\>\&\^\!\*\_\+\=]+'))
-                            FROM faers.rxnconso b
+                            FROM rxnorm.rxnconso b
                             WHERE b.sab = 'RXNORM'
                               AND b.tty = 'DF'
                             ORDER BY 1)

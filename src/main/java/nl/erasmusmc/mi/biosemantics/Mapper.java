@@ -147,7 +147,7 @@ public class Mapper {
         Set<Integer> ids = new HashSet<>();
         results.forEach((name, idList) -> ids.addAll(idList));
         if (ids.isEmpty()) return;
-        String sql = "SELECT rxcui, str FROM faers.rxnconso WHERE rxcui IN (%s) AND sab = 'RXNORM' AND TTY IN (%s);";
+        String sql = "SELECT rxcui, str FROM rxnorm.rxnconso WHERE rxcui IN (%s) AND sab = 'RXNORM' AND TTY IN (%s);";
 
         for (AbstractMap.SimpleEntry<String, String> tty : ttys) {
             String ttySql = String.format(sql, getIdString(ids), tty.getKey());
@@ -163,14 +163,14 @@ public class Mapper {
         if (ids.isEmpty()) return;
 
         String restSql = "WITH cte AS (SELECT DISTINCT rel.rxcui1, lower(string_agg(distinct r_in.str, ' / ' ORDER BY r_in.str)) AS ingr " +
-                "             FROM faers.rxnrel rel " +
-                "                      JOIN faers.rxnconso r_in ON rel.rxcui2 = r_in.rxcui " +
+                "             FROM rxnorm.rxnrel rel " +
+                "                      JOIN rxnorm.rxnconso r_in ON rel.rxcui2 = r_in.rxcui " +
                 "             WHERE rel.rxcui1 IN (" + getIdString(ids) + ") " +
                 "               AND r_in.tty IN ('IN') " +
                 "               AND r_in.sab = 'RXNORM' " +
                 "             GROUP BY rel.rxcui1) " +
                 "SELECT DISTINCT cte.rxcui1 AS rxcui, r.str AS ingredient " +
-                "FROM faers.rxnconso r " +
+                "FROM rxnorm.rxnconso r " +
                 "         JOIN cte ON lower(r.str) = cte.ingr AND r.tty IN ('IN', 'MIN') " +
                 "    AND r.sab = 'RXNORM'; ";
         Map<Integer, String> matches = db.executeQueryTwoValues(restSql);
@@ -178,14 +178,14 @@ public class Mapper {
         updateFromRxNav(results, matches, "rx_ingredient");
 
         String restSql2 = "WITH cte AS (SELECT DISTINCT rel.rxcui1, lower(string_agg(distinct r_in.str, ' / ' ORDER BY r_in.str)) AS ingr " +
-                "             FROM faers.rxnrel rel " +
-                "                      JOIN faers.rxnconso r_in ON rel.rxcui2 = r_in.rxcui " +
+                "             FROM rxnorm.rxnrel rel " +
+                "                      JOIN rxnorm.rxnconso r_in ON rel.rxcui2 = r_in.rxcui " +
                 "             WHERE rel.rxcui1 IN (" + getIdString(ids) + ") " +
                 "               AND r_in.tty IN ('DF') " +
                 "               AND r_in.sab = 'RXNORM' " +
                 "             GROUP BY rel.rxcui1) " +
                 "SELECT DISTINCT cte.rxcui1 AS rxcui, r.str AS ingredient " +
-                "FROM faers.rxnconso r " +
+                "FROM rxnorm.rxnconso r " +
                 "         JOIN cte ON lower(r.str) = cte.ingr AND r.tty IN ('DF') " +
                 "    AND r.sab = 'RXNORM'; ";
         Map<Integer, String> dfMatches = db.executeQueryTwoValues(restSql2);
@@ -294,7 +294,7 @@ public class Mapper {
             String stmt = "WITH cte1 AS (SELECT lower(str) AS df, " +
                     "                     array_length(string_to_array(lower(str), ' '), 1) " +
                     "                                AS word " +
-                    "              FROM faers.rxnconso rx " +
+                    "              FROM rxnorm.rxnconso rx " +
                     "              WHERE rx.tty = 'DF' " +
                     "                AND rx.sab = 'RXNORM' " +
                     "                AND length(str) > 3 " +
@@ -322,7 +322,7 @@ public class Mapper {
     }
 
     private void removeUnknown(String target) {
-        Set<String> distinctR = getSpaceSeperatedValues("SELECT DISTINCT lower(str) AS str FROM faers.rxnconso WHERE tty = 'DF' AND sab = 'RXNORM'");
+        Set<String> distinctR = getSpaceSeperatedValues("SELECT DISTINCT lower(str) AS str FROM rxnorm.rxnconso WHERE tty = 'DF' AND sab = 'RXNORM'");
         var q = String.format("select distinct lower(%1$s) from faers.drug_mapping_exact_java where %1$s is not null", target);
         Set<String> distinctF = getSpaceSeperatedValues(q);
         var sb = new StringBuilder();
