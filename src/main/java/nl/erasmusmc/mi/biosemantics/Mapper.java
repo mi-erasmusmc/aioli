@@ -44,28 +44,28 @@ public class Mapper {
     }
 
     public void map() {
-//        loadArt57();
-//        db.executeFile(SQL_CREATE_TABLE);
-//        db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
-////         We do it twice because more trailing chars can appear after cleaning a some
-//        cleanDrugNameAndAi();
-//        db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
-//        cleanDrugNameAndAi();
-//        db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
-////         Again twice to catch more
-//        db.executeFile(SQL_PARENTHESIS);
-//        cleanDrugNameAndAi();
-//        db.executeFile(SQL_PARENTHESIS);
-//        cleanDrugNameAndAi();
-//        db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
-//        db.executeFile("populate_brand_from_any_word.sql");
-//        callRxNormalizer();
-//        aeolus();
-//        loadManualMapping();
+        loadArt57();
+        db.executeFile(SQL_CREATE_TABLE);
+        db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
+//         We do it twice because more trailing chars can appear after cleaning a some
+        cleanDrugNameAndAi();
+        db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
+        cleanDrugNameAndAi();
+        db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
+//         Again twice to catch more
+        db.executeFile(SQL_PARENTHESIS);
+        cleanDrugNameAndAi();
+        db.executeFile(SQL_PARENTHESIS);
+        cleanDrugNameAndAi();
+        db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
+        db.executeFile("populate_brand_from_any_word.sql");
+        callRxNormalizer();
+        aeolus();
+        loadManualMapping();
         if (vocab.equals(AioliApp.Vocab.ATC)) {
-//            loadRxNormToAtcPatch();
-//            db.executeFile("clean_dose_amt.sql");
-//            cleanDoseForm();
+            loadRxNormToAtcPatch();
+            db.executeFile("clean_dose_amt.sql");
+            cleanDoseForm();
             exactMapping();
             remapDoseFrom(1);
         }
@@ -76,7 +76,7 @@ public class Mapper {
             exactMapping();
         }
         rollUp();
-//        db.executeFile("combined_drug_mapping.sql");
+        db.executeFile("combined_drug_mapping.sql");
     }
 
     // The aeolus mapping algorithm is seperated in two files, as it requires too much overhead for a single transaction.
@@ -101,7 +101,7 @@ public class Mapper {
 
     private void exactMapping() {
         log.info("Doing the mapping to specific rxnorm types, takes approx 1 hour per .sql file");
-//        db.executeFile("map_to_sbd.sql");
+        db.executeFile("map_to_sbd.sql");
         db.executeFile("map_to_scd.sql");
         db.executeFile("map_to_sbdf.sql");
         db.executeFile("map_to_scdf.sql");
