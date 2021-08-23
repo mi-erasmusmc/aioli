@@ -1,5 +1,5 @@
 -- name: brand_in_parenthesis
-UPDATE faers.drug_mapping_exact dme
+UPDATE faers.drug_mapping_exact_java dme
 SET rx_brand_name  = lower(rx.str),
     drugname_clean = replace(drugname_clean,
                              concat(' (', regexp_replace(dme.drugname_clean, '.* \((.*)\)', '\1', 'gi'), ')'),
@@ -12,7 +12,7 @@ WHERE lower(rx.str) = regexp_replace(dme.drugname_clean, '.* \((.*)\)', '\1', 'g
   AND dme.drugname_clean ~* '.* \((.*)\)';
 
 -- name: dose_form_in_parenthesis
-UPDATE faers.drug_mapping_exact dme
+UPDATE faers.drug_mapping_exact_java dme
 SET rx_dose_form   = lower(rx.str),
     drugname_clean = replace(drugname_clean,
                              concat(' (', regexp_replace(dme.drugname_clean, '.* \((.*)\)', '\1', 'gi'), ')'),
@@ -26,7 +26,7 @@ WHERE lower(rx.str) = regexp_replace(dme.drugname_clean, '.* \((.*)\)', '\1', 'g
 
 
 -- name: ingredient_in_parenthesis
-UPDATE faers.drug_mapping_exact dme
+UPDATE faers.drug_mapping_exact_java dme
 SET rx_ingredient  = lower(rx.str),
     drugname_clean = replace(drugname_clean,
                              concat(' (', regexp_replace(dme.drugname_clean, '.* \((.*)\)', '\1', 'gi'), ')'),
@@ -39,7 +39,7 @@ WHERE lower(rx.str) = regexp_replace(dme.drugname_clean, '.* \((.*)\)', '\1', 'g
   AND dme.drugname_clean ~* '.* \((.*)\)';
 
 -- name: ingredient_outside_parenthesis
-UPDATE faers.drug_mapping_exact dme
+UPDATE faers.drug_mapping_exact_java dme
 SET rx_ingredient = lower(rx.str)
 FROM rxnorm.rxnconso rx
 WHERE lower(rx.str) =
@@ -52,7 +52,7 @@ WHERE lower(rx.str) =
 
 
 -- name: brand_outside_parenthesis
-UPDATE faers.drug_mapping_exact dme
+UPDATE faers.drug_mapping_exact_java dme
 SET rx_brand_name = lower(rx.str)
 FROM rxnorm.rxnconso rx
 WHERE lower(rx.str) =
@@ -65,7 +65,7 @@ WHERE lower(rx.str) =
 
 
 -- name: brand_in_any_parenthesis
-UPDATE faers.drug_mapping_exact dme
+UPDATE faers.drug_mapping_exact_java dme
 SET rx_brand_name  = lower(rx.str),
     drugname_clean = replace(drugname_clean,
                              concat(' (', regexp_replace(dme.drugname_clean, '.*\((.*)\).*', '\1', 'gi'), ')'),
@@ -78,7 +78,7 @@ WHERE lower(rx.str) = regexp_replace(dme.drugname_clean, '.*\((.*)\).*', '\1', '
   AND dme.drugname_clean ~* '.* \((.*)\)';
 
 -- name: dose_form_in_any_parenthesis
-UPDATE faers.drug_mapping_exact dme
+UPDATE faers.drug_mapping_exact_java dme
 SET rx_dose_form = lower(rx.str)
 FROM rxnorm.rxnconso rx
 WHERE lower(rx.str) = regexp_replace(dme.drugname_clean, '.*\((.*)\).*', '\1', 'gi')
@@ -89,7 +89,7 @@ WHERE lower(rx.str) = regexp_replace(dme.drugname_clean, '.*\((.*)\).*', '\1', '
 
 
 -- name: ingredient_in_any_parenthesis
-UPDATE faers.drug_mapping_exact dme
+UPDATE faers.drug_mapping_exact_java dme
 SET rx_ingredient = lower(rx.str)
 FROM rxnorm.rxnconso rx
 WHERE lower(rx.str) = regexp_replace(dme.drugname_clean, '.*\((.*)\).*', '\1', 'gi')

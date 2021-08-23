@@ -299,7 +299,7 @@ public class Mapper {
                     "                AND rx.sab = 'RXNORM' " +
                     "                AND length(str) > 3 " +
                     "              GROUP BY lower(str)) " +
-                    "UPDATE faers.drug_mapping_exact dme " +
+                    "UPDATE faers.drug_mapping_exact_java dme " +
                     "SET rx_dose_form = cte1.df " +
                     "FROM cte1 " +
                     "WHERE dme.drugname_clean LIKE concat('%', cte1.df, '%') " +
