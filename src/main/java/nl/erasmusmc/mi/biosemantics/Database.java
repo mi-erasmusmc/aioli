@@ -23,6 +23,8 @@ public class Database {
     private final String url;
     private final Logger log = LogManager.getLogger();
     private Connection connection;
+    public final boolean isLocalhost;
+
 
     public Database() {
         props = PropertiesLoader.getProperties();
@@ -33,6 +35,7 @@ public class Database {
         var name = props.getProperty("name");
 
         url = String.format("jdbc:postgresql://%s:%d/%s?", host, port, name);
+        isLocalhost = host.equalsIgnoreCase("localhost") || host.equals("127.0.0.1");
     }
 
 

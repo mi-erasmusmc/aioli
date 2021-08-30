@@ -189,9 +189,9 @@ public class Mapper {
                 "         JOIN cte ON lower(r.str) = cte.ingr AND r.tty IN ('DF') " +
                 "    AND r.sab = 'RXNORM'; ";
         Map<Integer, String> dfMatches = db.executeQueryTwoValues(restSql2);
-        log.info("Matched {} in the rest group", dfMatches.size());
+        log.info("Matched {} dose forms in the rest group", dfMatches.size());
         updateFromRxNav(results, dfMatches, "rx_dose_form");
-
+        log.info("{} RxCUIs in the ids returned by rxnav were not stored", ids.size() - matches.size());
     }
 
     // Remove hits from result list, like this we only update to one kind of tty, based on the order of interest exact, in, pin, bn
@@ -219,8 +219,9 @@ public class Mapper {
         }
     }
 
+    // This method updates rxcui integer field
     private void updateRxCui
-            (Map<String, List<Integer>> results, Map<Integer, String> ingredientMatches, String query) {
+    (Map<String, List<Integer>> results, Map<Integer, String> ingredientMatches, String query) {
         Map<String, Integer> hits = new HashMap<>();
         results.forEach((originalName, idList) -> {
             AtomicInteger counter = new AtomicInteger();
@@ -240,8 +241,9 @@ public class Mapper {
         db.executeBatchReversedInteger(query, hits);
     }
 
+    // This method updates string fields
     private void updateNonRxCui
-            (Map<String, List<Integer>> results, Map<Integer, String> ingredientMatches, String query) {
+    (Map<String, List<Integer>> results, Map<Integer, String> ingredientMatches, String query) {
         Map<String, String> hits = new HashMap<>();
         results.forEach((originalName, idList) -> {
             AtomicInteger counter = new AtomicInteger();
@@ -372,22 +374,24 @@ public class Mapper {
     }
 
     private void loadArt57() {
+        char remote = db.isLocalhost ? ' ' : '\\';
         log.info("Loading Article 57 list");
         String dir = System.getProperty("user.dir") + "/src/main/resources/manual_mappings/art57_rxnorm.tsv";
         log.info("Loading article 57 data from {}", dir);
         String query = "DROP TABLE IF EXISTS faers.article57_rxnorm;" +
                 "CREATE TABLE faers.article57_rxnorm (name TEXT, ingredient TEXT, rxcui TEXT);" +
-                "COPY faers.article57_rxnorm FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
+                remote + "COPY faers.article57_rxnorm FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
         db.execute(query);
     }
 
     private void loadRxNormToAtcPatch() {
+        char remote = db.isLocalhost ? ' ' : '\\';
         log.info("Loading RxNorm to ATC list");
         String dir = System.getProperty("user.dir") + "/src/main/resources/manual_mappings/rxnorm_atc_patch.tsv";
         log.info("Loading rxnorm_atc_patch from {}", dir);
         String query = "DROP TABLE IF EXISTS faers.rxnorm_atc_patch;" +
                 "CREATE TABLE faers.rxnorm_atc_patch (code INT, name VARCHAR, ingredients INT, atc VARCHAR);" +
-                "COPY faers.rxnorm_atc_patch FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
+                remote + "COPY faers.rxnorm_atc_patch FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
         db.execute(query);
 
         String index = "CREATE EXTENSION IF NOT EXISTS pg_trgm; " +
@@ -397,12 +401,13 @@ public class Mapper {
     }
 
     private void loadManualMapping() {
+        char remote = db.isLocalhost ? ' ' : '\\';
         log.info("Manual mapping of drugs");
         String dir = System.getProperty("user.dir") + "/src/main/resources/manual_mappings/manual_mapping.tsv";
         log.info("Loading manual_mapping data from {}", dir);
         String query = "DROP TABLE IF EXISTS faers.manual_mapping;" +
                 "CREATE TABLE faers.manual_mapping (drugname VARCHAR, rx_ingredient VARCHAR);" +
-                "COPY faers.manual_mapping FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
+                remote + "COPY faers.manual_mapping FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
         db.execute(query);
 
         String sql = "UPDATE faers.drug_mapping_exact_java dme " +

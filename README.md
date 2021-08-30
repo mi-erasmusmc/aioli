@@ -31,8 +31,10 @@ comments and suggestions are very much welcome.
 - Make sure the db is configured in accordance to your needs in the config.properties file located in scr/main/resources
 
 - Use `mvn clean package assembly:single` in the present folder to build the app
-- Run with `java -jar target/ailoi_java-1.0-SNAPSHOT-jar-with-dependencies.jar -tv <target vocabulary> -rmin <true or false>'
-  `
+- Run with `java -jar target/ailoi_java-1.0-SNAPSHOT-jar-with-dependencies.jar -tv <target vocabulary> -rmin <true or false>`
+
+- Running time is approx 5 - 15 hours depending on target vocab (ATC slowest, RXNORM fastest) and the specs of your system.
+
 
 ### OPTIONS
 

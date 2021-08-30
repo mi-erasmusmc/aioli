@@ -1,11 +1,11 @@
 SET SEARCH_PATH = faers;
 
 -- name: drop_standard_case_drug
-DROP TABLE IF EXISTS standard_case_drug_java;
+DROP TABLE IF EXISTS standard_case_drug;
 
 
 -- name: create the big final table
-CREATE TABLE standard_case_drug_java AS
+CREATE TABLE standard_case_drug AS
     (SELECT a.primaryid,
             NULL         AS isr,
             drug_seq,
