@@ -13,20 +13,24 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+
 public class RxNormalizer {
 
+    private int failureCounter = 0;
     private static final String RXNAV_URL = "https://rxnav.nlm.nih.gov/REST/rxcui.json?search=2&name=";
     private static final Logger log = LogManager.getLogger();
     private final HttpClient client = HttpClient.newBuilder()
+            .connectTimeout(Duration.of(10, SECONDS))
             .build();
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -37,7 +41,7 @@ public class RxNormalizer {
         long start = System.currentTimeMillis();
         var fullList = new ArrayList<>(drugs);
         var size = fullList.size();
-        log.info("calling rxnormalizer for {} drugs will take approx {} mins", size, size / 600.0);
+        log.info("Calling RxNormalizer for {} drugs will take approx {} mins", size, size / 600.0);
         var maps = ListUtils.partition(fullList, size / 3).parallelStream().map(this::callRxNavSplit).collect(Collectors.toList());
         long diff = System.currentTimeMillis() - start;
         var results = Stream.concat(maps.get(0).entrySet().stream(), maps.get(1).entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -48,7 +52,7 @@ public class RxNormalizer {
 
     public Map<String, List<Integer>> callRxNavSplit(List<String> drugs) {
         int total = drugs.size();
-        Map<String, List<Integer>> results = new HashMap<>(total / 10);
+        Map<String, List<Integer>> results = new HashMap<>(total / 7);
         drugs.forEach(drug -> {
             List<String> ids = makeCall(drug);
             if (ids != null && !ids.isEmpty()) {
@@ -71,8 +75,21 @@ public class RxNormalizer {
                     .thenApply(HttpResponse::body)
                     .thenApply(this::parseBodyToIds)
                     .get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            // If for some reason RxNorm API is failing us we will just pause a couple of seconds and resume, for a max of 25 tims.
+            log.warn(e.getMessage());
+            log.warn("RxNav request failed for {}", request.uri());
+            try {
+                Thread.sleep(5000);
+                failureCounter++;
+                if (failureCounter > 25) {
+                    log.error("RxNav has failed over 25 requests, killing the process");
+                    throw new RuntimeException(e);
+                }
+            } catch (InterruptedException ignored) {
+                failureCounter++;
+            }
+            return Collections.emptyList();
         }
     }
 
@@ -80,7 +97,7 @@ public class RxNormalizer {
         try {
             return mapper.readValue(body, RxNavResponse.class).getIdGroup().getRxnormId();
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Failed to parse body: {} to ids", body);
             throw new RuntimeException(e);
         }
     }

@@ -233,7 +233,7 @@ public class Mapper {
                 }
             });
             if (counter.get() == 1) {
-                log.info("{} mapped to {}", originalName, updateValue);
+                log.debug("{} mapped to {}", originalName, updateValue);
                 hits.put(originalName, updateValue.get());
             }
         });
