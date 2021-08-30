@@ -4,7 +4,12 @@ import nl.erasmusmc.mi.biosemantics.conf.PropertiesLoader;
 import nl.erasmusmc.mi.biosemantics.exception.DatabaseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.core.BaseConnection;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -23,7 +28,6 @@ public class Database {
     private final String url;
     private final Logger log = LogManager.getLogger();
     private Connection connection;
-    public final boolean isLocalhost;
 
 
     public Database() {
@@ -33,9 +37,7 @@ public class Database {
         var port = Integer.parseInt(props.getProperty("port"));
         var host = props.getProperty("host");
         var name = props.getProperty("name");
-
         url = String.format("jdbc:postgresql://%s:%d/%s?", host, port, name);
-        isLocalhost = host.equalsIgnoreCase("localhost") || host.equals("127.0.0.1");
     }
 
 
@@ -161,6 +163,18 @@ public class Database {
             }
             return pair;
         } catch (SQLException e) {
+            log.error(e.getMessage());
+            throw new DatabaseException(e);
+        }
+    }
+
+    public void copyFile(String table, String path) {
+        try {
+            String sql = "COPY " + table + " FROM STDIN WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
+            CopyManager cm = new CopyManager((BaseConnection) getConnection());
+            long affected = cm.copyIn(sql, new BufferedReader(new FileReader(path)));
+            log.info("Inserted {} rows into {}", affected, table);
+        } catch (SQLException | IOException e) {
             log.error(e.getMessage());
             throw new DatabaseException(e);
         }

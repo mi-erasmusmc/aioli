@@ -374,25 +374,23 @@ public class Mapper {
     }
 
     private void loadArt57() {
-        char remote = db.isLocalhost ? ' ' : '\\';
-        log.info("Loading Article 57 list");
         String dir = System.getProperty("user.dir") + "/src/main/resources/manual_mappings/art57_rxnorm.tsv";
+        log.info("Loading Article 57 list");
         log.info("Loading article 57 data from {}", dir);
         String query = "DROP TABLE IF EXISTS faers.article57_rxnorm;" +
-                "CREATE TABLE faers.article57_rxnorm (name TEXT, ingredient TEXT, rxcui TEXT);" +
-                remote + "COPY faers.article57_rxnorm FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
+                "CREATE TABLE faers.article57_rxnorm (name TEXT, ingredient TEXT, rxcui TEXT);";
         db.execute(query);
+        db.copyFile("faers.article57_rxnorm", dir);
     }
 
     private void loadRxNormToAtcPatch() {
-        char remote = db.isLocalhost ? ' ' : '\\';
         log.info("Loading RxNorm to ATC list");
         String dir = System.getProperty("user.dir") + "/src/main/resources/manual_mappings/rxnorm_atc_patch.tsv";
         log.info("Loading rxnorm_atc_patch from {}", dir);
         String query = "DROP TABLE IF EXISTS faers.rxnorm_atc_patch;" +
-                "CREATE TABLE faers.rxnorm_atc_patch (code INT, name VARCHAR, ingredients INT, atc VARCHAR);" +
-                remote + "COPY faers.rxnorm_atc_patch FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
+                "CREATE TABLE faers.rxnorm_atc_patch (code INT, name VARCHAR, ingredients INT, atc VARCHAR);";
         db.execute(query);
+        db.copyFile("faers.rxnorm_atc_patch", dir);
 
         String index = "CREATE EXTENSION IF NOT EXISTS pg_trgm; " +
                 "CREATE INDEX rxnorm_atc_patch_name_index " +
@@ -401,14 +399,13 @@ public class Mapper {
     }
 
     private void loadManualMapping() {
-        char remote = db.isLocalhost ? ' ' : '\\';
         log.info("Manual mapping of drugs");
         String dir = System.getProperty("user.dir") + "/src/main/resources/manual_mappings/manual_mapping.tsv";
         log.info("Loading manual_mapping data from {}", dir);
         String query = "DROP TABLE IF EXISTS faers.manual_mapping;" +
-                "CREATE TABLE faers.manual_mapping (drugname VARCHAR, rx_ingredient VARCHAR);" +
-                remote + "COPY faers.manual_mapping FROM '" + dir + "' WITH DELIMITER E'\\t' CSV HEADER QUOTE E'\\b';";
+                "CREATE TABLE faers.manual_mapping (drugname VARCHAR, rx_ingredient VARCHAR);";
         db.execute(query);
+        db.copyFile("faers.manual_mapping", dir);
 
         String sql = "UPDATE faers.drug_mapping_exact_java dme " +
                 "SET rx_ingredient = mm.rx_ingredient " +
