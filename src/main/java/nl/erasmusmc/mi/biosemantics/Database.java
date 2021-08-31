@@ -33,7 +33,9 @@ public class Database {
     public Database() {
         props = PropertiesLoader.getProperties();
         props.setProperty("allowMultiQueries", "true");
-        props.setProperty("preferQueryMode", "simple");
+        props.setProperty("gssEncMode", "disable");
+        props.setProperty("socketTimeout", "0");
+        props.setProperty("connectTimeout", "0");
         var port = Integer.parseInt(props.getProperty("port"));
         var host = props.getProperty("host");
         var name = props.getProperty("name");
@@ -57,13 +59,16 @@ public class Database {
     public void executeFile(String fileName) {
         log.info("Executing: {}", fileName);
         var query = sqlFileToString(fileName);
-        log.info(query);
+        log.debug(query);
         var conn = getConnection();
         try (var stmt = conn.prepareStatement(query)) {
             stmt.execute();
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new DatabaseException(e);
+            // Following file has a query which is known to occasionally break postgres, if it happens we just pretend like all is good
+            if (!fileName.equals("populate_brand_from_any_word.sql")) {
+                throw new DatabaseException(e);
+            }
         }
     }
 
