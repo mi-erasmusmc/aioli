@@ -31,10 +31,11 @@ comments and suggestions are very much welcome.
 - Make sure the db is configured in accordance to your needs in the config.properties file located in scr/main/resources
 
 - Use `mvn clean package assembly:single` in the present folder to build the app
-- Run with `java -jar target/ailoi_java-1.0-SNAPSHOT-jar-with-dependencies.jar -tv <target vocabulary> -rmin <true or false>`
+- Run
+  with `java -jar target/ailoi_java-1.0-SNAPSHOT-jar-with-dependencies.jar -tv <target vocabulary> -rmin <true or false>`
 
-- Running time is approx 5 - 15 hours depending on target vocab (ATC slowest, RXNORM fastest) and the specs of your system.
-
+- Running time is approx 5 - 15 hours depending on target vocab (ATC slowest, RXNORM fastest) and the specs of your
+  system.
 
 ### OPTIONS
 
@@ -43,4 +44,9 @@ comments and suggestions are very much welcome.
 *--retain-multi-ingredients -rmin* In the original mapping section of AEOLUS the idea was to include multi-ingredient
 drugs in the roll up, the present implementation allows you to split the multi-ingredient drugs to single ingredient
 entries if you please (This option only makes a difference when targeting RXNORM or OMOP).
+
+*--skip-normalizer -sn* Whether you wish to use the RxNorm API, in order to run this you need to run the
+RxNav-in-a-Box locally on port 4000. Otherwise, we overload the RxNav
+servers https://lhncbc.nlm.nih.gov/RxNav/applications/RxNav-in-a-Box.html
+
   

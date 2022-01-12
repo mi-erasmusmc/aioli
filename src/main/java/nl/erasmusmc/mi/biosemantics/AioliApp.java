@@ -22,12 +22,14 @@ public class AioliApp {
     private static final String TARGET_VOCAB = "target-vocab";
     private static final Logger log = LogManager.getLogger(AioliApp.class.getName());
     public static final String RETAIN_MULTI_INGREDIENTS = "retain-multi-ingredients";
+    public static final String SKIP_NORMALIZER = "skip-normalizer";
+
 
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         log.info("Starting the Aioli");
         Arguments arguments = getArguments(args);
-        Mapper mapper = new Mapper(arguments.getVocab(), arguments.getRetainMulti());
+        Mapper mapper = new Mapper(arguments.getVocab(), arguments.getRetainMulti(), arguments.getSkipNormalizer());
         mapper.map();
         long minutes = (System.currentTimeMillis() - start) / 60000;
         log.info("Done! in {} minutes", minutes);
@@ -42,6 +44,9 @@ public class AioliApp {
         Option rmin = new Option("rmin", RETAIN_MULTI_INGREDIENTS, true, "retain multi ingredient codes");
         rmin.setRequired(true);
         options.addOption(rmin);
+        Option sn = new Option("sn", SKIP_NORMALIZER, true, "skip the rxnav api");
+        sn.setRequired(true);
+        options.addOption(sn);
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd = null;
@@ -55,14 +60,21 @@ public class AioliApp {
         }
         String tvInput = cmd.getOptionValue(TARGET_VOCAB);
         String rminInput = cmd.getOptionValue(RETAIN_MULTI_INGREDIENTS);
+        String snInput = cmd.getOptionValue(SKIP_NORMALIZER);
         Vocab vocab = null;
         Boolean retainMulti = null;
+        Boolean skipNormalizer = null;
         try {
             vocab = Vocab.valueOf(tvInput.toUpperCase());
             retainMulti = BooleanUtils.toBooleanObject(rminInput);
+            skipNormalizer = BooleanUtils.toBooleanObject(snInput);
             log.info("Mapping to {}", vocab);
             if (retainMulti == null) {
-                log.error("{} is not a valid boolean", rminInput);
+                log.error("{} is not a valid boolean for retain multi", rminInput);
+                System.exit(1);
+            }
+            if (skipNormalizer == null) {
+                log.error("{} is not a valid boolean for skip normalizers", skipNormalizer);
                 System.exit(1);
             }
         } catch (IllegalArgumentException e) {
@@ -70,7 +82,7 @@ public class AioliApp {
             log.error("{} is not a valid target, valid targets are {}", tvInput, validTargets);
             System.exit(1);
         }
-        return new Arguments(vocab, retainMulti);
+        return new Arguments(vocab, retainMulti, skipNormalizer);
     }
 
     public enum Vocab {
@@ -85,4 +97,5 @@ public class AioliApp {
 class Arguments {
     private AioliApp.Vocab vocab;
     private Boolean retainMulti;
+    private Boolean skipNormalizer;
 }

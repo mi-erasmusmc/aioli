@@ -27,10 +27,10 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class RxNormalizer {
 
     private int failureCounter = 0;
-    private static final String RXNAV_URL = "https://rxnav.nlm.nih.gov/REST/rxcui.json?search=2&name=";
+    private static final String RXNAV_URL = "http://localhost:4000/REST/rxcui.json?search=2&name=";
     private static final Logger log = LogManager.getLogger();
     private final HttpClient client = HttpClient.newBuilder()
-            .connectTimeout(Duration.of(10, SECONDS))
+            .connectTimeout(Duration.of(30, SECONDS))
             .build();
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -41,7 +41,7 @@ public class RxNormalizer {
         long start = System.currentTimeMillis();
         var fullList = new ArrayList<>(drugs);
         var size = fullList.size();
-        log.info("Calling RxNormalizer for {} drugs will take approx {} mins", size, size / 600.0);
+        log.info("Calling RxNormalizer for {} drugs", size);
         var maps = ListUtils.partition(fullList, size / 3).parallelStream().map(this::callRxNavSplit).collect(Collectors.toList());
         long diff = System.currentTimeMillis() - start;
         var results = Stream.concat(maps.get(0).entrySet().stream(), maps.get(1).entrySet().stream()).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -54,10 +54,12 @@ public class RxNormalizer {
         int total = drugs.size();
         Map<String, List<Integer>> results = new HashMap<>(total / 7);
         drugs.forEach(drug -> {
-            List<String> ids = makeCall(drug);
-            if (ids != null && !ids.isEmpty()) {
-                List<Integer> idsInt = ids.stream().map(Integer::parseInt).collect(Collectors.toList());
-                results.put(drug, idsInt);
+            if (drug != null && !drug.isBlank()) {
+                List<String> ids = makeCall(drug);
+                if (ids != null && !ids.isEmpty()) {
+                    List<Integer> idsInt = ids.stream().map(Integer::parseInt).collect(Collectors.toList());
+                    results.put(drug, idsInt);
+                }
             }
         });
         return results;
@@ -76,11 +78,11 @@ public class RxNormalizer {
                     .thenApply(this::parseBodyToIds)
                     .get();
         } catch (Exception e) {
-            // If for some reason RxNorm API is failing us we will just pause a couple of seconds and resume, for a max of 25 tims.
+            // If for some reason RxNorm API is failing us we will just pause a couple of seconds and resume, for a max of 25 tries.
             log.warn(e.getMessage());
             log.warn("RxNav request failed for {}", request.uri());
             try {
-                Thread.sleep(5000);
+                Thread.sleep(2000);
                 failureCounter++;
                 if (failureCounter > 25) {
                     log.error("RxNav has failed over 25 requests, killing the process");
@@ -89,7 +91,7 @@ public class RxNormalizer {
             } catch (InterruptedException ignored) {
                 failureCounter++;
             }
-            return Collections.emptyList();
+            return makeCall(drug);
         }
     }
 

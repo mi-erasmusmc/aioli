@@ -34,11 +34,13 @@ public class Mapper {
     RxNormalizer rxNormalizer;
     AioliApp.Vocab vocab;
     boolean retainMulti;
+    boolean skipNormalizer;
 
 
-    public Mapper(AioliApp.Vocab vocab, boolean retainMulti) {
+    public Mapper(AioliApp.Vocab vocab, boolean retainMulti, boolean skipNormalizer) {
         this.vocab = vocab;
         this.retainMulti = retainMulti;
+        this.skipNormalizer = skipNormalizer;
         this.db = new Database();
         this.rxNormalizer = new RxNormalizer();
     }
@@ -59,7 +61,9 @@ public class Mapper {
         cleanDrugNameAndAi();
         db.executeFile(SQL_POPULATE_BRAND_AND_INGREDIENT);
         db.executeFile("populate_brand_from_any_word.sql");
-        callRxNormalizer();
+        if (!skipNormalizer) {
+            callRxNormalizer();
+        }
         aeolus();
         loadManualMapping();
         if (vocab.equals(AioliApp.Vocab.ATC)) {
@@ -89,6 +93,10 @@ public class Mapper {
         log.info("Getting all final ids for stuff takes 30 minutes");
         String sqlFileName = "rollup_" + vocab.toString().toLowerCase() + ".sql";
         db.executeFile(sqlFileName);
+
+        if (vocab.equals(AioliApp.Vocab.RXNORM) && !retainMulti) {
+            db.executeFile("split_multi_rxnorm.sql");
+        }
     }
 
     private void remapDoseFrom(int round) {

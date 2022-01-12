@@ -33,7 +33,6 @@ public class Database {
     public Database() {
         props = PropertiesLoader.getProperties();
         props.setProperty("allowMultiQueries", "true");
-        props.setProperty("gssEncMode", "disable");
         props.setProperty("socketTimeout", "0");
         props.setProperty("connectTimeout", "0");
         var port = Integer.parseInt(props.getProperty("port"));
@@ -64,11 +63,7 @@ public class Database {
         try (var stmt = conn.prepareStatement(query)) {
             stmt.execute();
         } catch (SQLException e) {
-            log.error(e.getMessage());
-            // Following file has a query which is known to occasionally break postgres, if it happens we just pretend like all is good
-            if (!fileName.equals("populate_brand_from_any_word.sql")) {
-                throw new DatabaseException(e);
-            }
+            handleSQLException(fileName, e);
         }
     }
 
@@ -78,8 +73,7 @@ public class Database {
         try (var stmt = getConnection().prepareStatement(query)) {
             stmt.execute();
         } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new DatabaseException(e);
+            handleSQLException(query, e);
         }
     }
 
@@ -98,7 +92,13 @@ public class Database {
             stmt.executeBatch();
         } catch (SQLException e) {
             log.error(e.getMessage());
-            throw new DatabaseException(e);
+            // Following file has a query which is known to occasionally break postgres, if it happens we just pretend like all is good
+            if (!e.getMessage().contains("An I/O error occurred while sending to the backend.")) {
+                throw new DatabaseException(e);
+            } else {
+                log.warn("Going to do the crazy hack for batch execute");
+                doCrazyHack();
+            }
         }
     }
 
@@ -116,8 +116,7 @@ public class Database {
             });
             stmt.executeBatch();
         } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new DatabaseException(e);
+            handleSQLException(query, e);
         }
     }
 
@@ -135,8 +134,7 @@ public class Database {
             });
             stmt.executeBatch();
         } catch (SQLException e) {
-            log.error(e.getMessage());
-            throw new DatabaseException(e);
+            handleSQLException(query, e);
         }
     }
 
@@ -181,6 +179,51 @@ public class Database {
             log.info("Inserted {} rows into {}", affected, table);
         } catch (SQLException | IOException e) {
             log.error(e.getMessage());
+            throw new DatabaseException(e);
+        }
+    }
+
+    // there is an issue when running docker on Mac where the connection is interrupted after 5 minutes, but the query keeps running in the db...
+    // Instead of solving the root issue (I have tried (a bit)...), we have a crazy hack
+    private void handleSQLException(String fileName, SQLException e) {
+        log.warn("Caught SQLException, {}", e.getMessage());
+        if (!e.getMessage().contains("An I/O error occurred while sending to the backend.")) {
+            throw new DatabaseException(e);
+        } else {
+            log.warn("Going to do the crazy hack for {}", fileName);
+            doCrazyHack();
+        }
+    }
+
+
+    private void doCrazyHack() {
+        var conn = getConnection();
+        var sql = "SELECT " +
+                "    pid, " +
+                "    now() - pg_stat_activity.query_start AS duration, " +
+                "    query, " +
+                "    state " +
+                "FROM pg_stat_activity " +
+                "WHERE (now() - pg_stat_activity.query_start) > INTERVAL '4 minutes';";
+        try (var stmt = conn.prepareStatement(sql)) {
+            var rs = stmt.executeQuery();
+            if (rs.next()) {
+                var query = rs.getString("query");
+                if (query.contains("SHOW TRANSACTION ISOLATION LEVEL")) {
+                    var pid = rs.getInt("pid");
+                    try (var killStmt = conn.prepareStatement("SELECT pg_terminate_backend(" + pid + ");")) {
+                        log.warn("Killing: {}", query);
+                        killStmt.execute();
+                    }
+                } else {
+                    log.warn("Waiting for this query to finish: {}", query);
+                }
+                Thread.sleep(100000);
+                doCrazyHack();
+            } else {
+                log.info("Seems like we are dong waiting");
+            }
+        } catch (SQLException | InterruptedException e) {
             throw new DatabaseException(e);
         }
     }
