@@ -19,7 +19,7 @@ comments and suggestions are very much welcome.
 
 - You will need the RxNORM database, in particular the RXNCONSO and RXNREL tables. The db is freely available
   [here](https://www.nlm.nih.gov/research/umls/rxnorm/docs/rxnormfiles.html). The app expects the tables to be located
-  in your the same db as the aeolus data and located in a schema named rxnorm
+  in the same db as the aeolus data and located in a schema named rxnorm
 
 - To map towards OMOP concept ids:
     - A database containing the RxNORM vocabulary from [OHDSI](https://athena.ohdsi.org/vocabulary/list). The app
