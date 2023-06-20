@@ -26,6 +26,8 @@ comments and suggestions are very much welcome.
       expects this database to be located in the same db in a schema called staging_vocabulary (this is in line with the
       CEM information prep step, that this app was originally built to be used for)
 
+- To map towards ATC you need a conversion table which is available on request
+
 ### HOW TO RUN
 
 - Make sure the db is configured in accordance to your needs in the config.properties file located in scr/main/resources
