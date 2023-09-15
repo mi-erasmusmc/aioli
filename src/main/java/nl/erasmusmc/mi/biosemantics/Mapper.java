@@ -393,7 +393,7 @@ public class Mapper {
 
     private void loadRxNormToAtcPatch() {
         log.info("Loading RxNorm to ATC list");
-        String dir = System.getProperty("user.dir") + "/src/main/resources/manual_mappings/rxnorm_atc_patch.tsv";
+        String dir = System.getProperty("user.dir") + "/src/main/resources/manual_mappings/rxnorm_atc_patch_2023_05_05.csv";
         log.info("Loading rxnorm_atc_patch from {}", dir);
         String query = "DROP TABLE IF EXISTS faers.rxnorm_atc_patch;" +
                 "CREATE TABLE faers.rxnorm_atc_patch (code INT, name VARCHAR, ingredients INT, atc VARCHAR);";
