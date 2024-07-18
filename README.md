@@ -1,20 +1,16 @@
-FAERS DRUG STANDARDIZER (AIOLI)
+AIOLI DRUG STANDARDIZER
 =======================
 
-**The FAERS drug standardizer is a tool to be used in combination with AEOLUS for a larger and more accurate mapping of
-the FEARS data to RxNORM CUIs and OMOP standard ingredient concept ids. It also allows for standardization to ATC rather
-than RxNorm. Principally it can fully replace the AEOLUS drug_mapping scripts.**
-
-Note:
-The master branch of this project should work, but the project as whole is still under construction. Contributions,
-comments and suggestions are very much welcome.
+**The AIOLI drug standardizer is a tool to be used in combination with AEOLUS for a larger and more accurate mapping of
+spontaneous reporting data (such as FAERS) to RxNORM CUIs and OMOP standard ingredient concept ids. It also allows for 
+standardization to ATC rather than RxNorm. Principally it can fully replace the AEOLUS drug_mapping scripts.**
 
 ### REQUIREMENTS
 
 - Java and Maven
 
 - Aioli builds on the [AEOLUS](https://github.com/mi-erasmusmc/faersdbstats) system, so once you have used that to load
-  the FEARS data up until the drug mapping section you can use this app to do the mapping, and then use the AEOLUS again
+  the FAERS data up until the drug mapping section you can use this app to do the mapping, and then use the AEOLUS again
   for the final stats calculations.
 
 - You will need the RxNORM database, in particular the RXNCONSO and RXNREL tables. The db is freely available
@@ -25,8 +21,6 @@ comments and suggestions are very much welcome.
     - A database containing the RxNORM vocabulary from [OHDSI](https://athena.ohdsi.org/vocabulary/list). The app
       expects this database to be located in the same db in a schema called staging_vocabulary (this is in line with the
       CEM information prep step, that this app was originally built to be used for)
-
-- To map towards ATC you need a conversion table which is available on request
 
 ### HOW TO RUN
 
